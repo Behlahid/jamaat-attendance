@@ -121,3 +121,8 @@
  GET /api/events 200 in 1031ms (next.js: 6ms, application-code: 1025ms)
  GET /api/attendance?eventId=4505a73c-934f-4d19-96ef-99ea8c0aad35 200 in 1299ms (next.js: 7ms, application-code: 1292ms)
  GET /api/attendance?eventId=4505a73c-934f-4d19-96ef-99ea8c0aad35 200 in 1935ms (next.js: 26ms, application-code: 1909ms)
+ GET / 200 in 618ms (next.js: 239ms, application-code: 380ms)
+ GET /login 200 in 1092ms (next.js: 874ms, application-code: 218ms)
+ GET /api/account/check-setup 200 in 909ms (next.js: 270ms, application-code: 639ms)
+ GET /api/account/check-setup 200 in 251ms (next.js: 13ms, application-code: 237ms)
+[?25h
