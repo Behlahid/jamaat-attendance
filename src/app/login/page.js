@@ -27,7 +27,7 @@ export default function LoginPage() {
   useEffect(() => {
     async function checkSetup() {
       try {
-        const res = await fetch('/api/auth/check-setup');
+        const res = await fetch('/api/account/check-setup');
         const data = await res.json();
         setIsSetup(!data.hasAdmin);
       } catch {

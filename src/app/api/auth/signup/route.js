@@ -1,10 +1,11 @@
 import { createServerClient } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
 
-// ── Rate limiter (stricter for signup: 3 attempts per 30 min) ──
+// ── Rate limiter (relaxed in local dev to avoid locking out setup) ──
 const signupAttempts = new Map();
-const MAX_SIGNUP = 3;
-const SIGNUP_WINDOW_MS = 30 * 60 * 1000;
+const IS_DEV = process.env.NODE_ENV !== 'production';
+const MAX_SIGNUP = IS_DEV ? 20 : 3;
+const SIGNUP_WINDOW_MS = IS_DEV ? 5 * 60 * 1000 : 30 * 60 * 1000;
 
 function checkSignupRateLimit(ip) {
   const now = Date.now();
@@ -15,6 +16,10 @@ function checkSignupRateLimit(ip) {
   }
   record.count++;
   return record.count <= MAX_SIGNUP;
+}
+
+function clearSignupRateLimit(ip) {
+  signupAttempts.delete(ip);
 }
 
 // POST /api/auth/signup — Create admin account (first-time setup)
@@ -80,8 +85,12 @@ export async function POST(request) {
 
     if (createError) {
       console.error('[SIGNUP] createUser error:', createError);
+      let errMsg = createError.message;
+      if (errMsg === '{}' || !errMsg) {
+        errMsg = `Error: ${createError.name} - ${createError.status || 500}`;
+      }
       return NextResponse.json(
-        { error: createError.message || createError.name || 'Failed to create user' },
+        { error: errMsg, details: createError },
         { status: 400 }
       );
     }
@@ -94,6 +103,21 @@ export async function POST(request) {
       );
     }
 
+    // Workaround: Manually insert the profile in case the Postgres trigger failed or was deleted.
+    // We use UPSERT (on conflict do nothing or update) just in case the trigger actually worked.
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({
+        id: userId,
+        email: email,
+        display_name: displayName,
+        role: 'admin'
+      }, { onConflict: 'id' });
+    
+    if (profileError) {
+      console.warn('[SIGNUP] Profile creation issue (might be expected if trigger handled it):', profileError);
+    }
+
     // DON'T use signInWithPassword on service-role client.
     // Instead, generate a session via the admin API.
     const { data: sessionData, error: sessionError } =
@@ -104,6 +128,7 @@ export async function POST(request) {
 
     // Even if generateLink fails, the user IS created.
     // Return user ID so the client can call /api/auth/login instead.
+    clearSignupRateLimit(ip);
     return NextResponse.json({
       success: true,
       userId,

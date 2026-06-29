@@ -9,16 +9,24 @@ export default function AdminLayout({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.replace('/login');
-      } else if (!isAdmin) {
-        router.replace('/scan');
-      }
+    if (loading) return;
+
+    if (!user) {
+      router.replace('/login');
+      return;
+    }
+
+    if (!profile) {
+      router.replace('/');
+      return;
+    }
+
+    if (!isAdmin) {
+      router.replace('/scan');
     }
   }, [user, profile, loading, isAdmin, router]);
 
-  if (loading || !isAdmin) {
+  if (loading) {
     return (
       <div style={{
         display: 'flex',

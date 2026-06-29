@@ -1,0 +1,38 @@
+⚠ Fast Refresh had to perform a full reload when ./src/lib/AuthContext.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./src/lib/AuthContext.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[SIGNUP] createUser error: Error [AuthRetryableFetchError]: {}
+    at async POST (src\app\api\auth\signup\route.js:71:54)
+  69 |
+  70 |     // Create user via admin API (bypasses email confirmation)
+> 71 |     const { data: createData, error: createError } = await supabase.auth.admin.createUser({
+     |                                                      ^
+  72 |       email,
+  73 |       password,
+  74 |       email_confirm: true, {
+  __isAuthError: true,
+  status: 500,
+  code: undefined
+}
+[SIGNUP] createUser error: Error [AuthRetryableFetchError]: {}
+    at async POST (src\app\api\auth\signup\route.js:71:54)
+  69 |
+  70 |     // Create user via admin API (bypasses email confirmation)
+> 71 |     const { data: createData, error: createError } = await supabase.auth.admin.createUser({
+     |                                                      ^
+  72 |       email,
+  73 |       password,
+  74 |       email_confirm: true, {
+  __isAuthError: true,
+  status: 500,
+  code: undefined
+}
+[browser] Auth error (full object): {"stack":"Error: Error: AuthRetryableFetchError - 500\n    at signUp (http://localhost:3000/_next/static/chunks/src_lib_0ukjemt._.js:184:19)\n    at async handleSubmit (http://localhost:3000/_next/static/chunks/_0k3hxwe._.js:71:17)","message":"Error: AuthRetryableFetchError - 500"} 
+    at handleSubmit (file://C:/Users/Behlah/Downloads/Jamaat Attendance/.next/dev/static/chunks/_0k3hxwe._.js:80:21) (file://C:/Users/Behlah/Downloads/Jamaat Attendance/.next/dev/static/chunks/_0k3hxwe._.js:80:21)
+[browser] Auth error (full object): {"stack":"Error: Too many signup attempts. Try again later.\n    at signUp (http://localhost:3000/_next/static/chunks/src_lib_0ukjemt._.js:184:19)\n    at async handleSubmit (http://localhost:3000/_next/static/chunks/_0k3hxwe._.js:71:17)","message":"Too many signup attempts. Try again later."} 
+    at handleSubmit (file://C:/Users/Behlah/Downloads/Jamaat Attendance/.next/dev/static/chunks/_0k3hxwe._.js:80:21) (file://C:/Users/Behlah/Downloads/Jamaat Attendance/.next/dev/static/chunks/_0k3hxwe._.js:80:21)
+[browser] Auth error (full object): {"stack":"Error: Too many signup attempts. Try again later.\n    at signUp (http://localhost:3000/_next/static/chunks/src_lib_0ukjemt._.js:184:19)\n    at async handleSubmit (http://localhost:3000/_next/static/chunks/_0k3hxwe._.js:71:17)","message":"Too many signup attempts. Try again later."} 
+    at handleSubmit (file://C:/Users/Behlah/Downloads/Jamaat Attendance/.next/dev/static/chunks/_0k3hxwe._.js:80:21) (file://C:/Users/Behlah/Downloads/Jamaat Attendance/.next/dev/static/chunks/_0k3hxwe._.js:80:21)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload when ./src/lib/AuthContext.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior (file://C:/Users/Behlah/Downloads/Jamaat Attendance/.next/dev/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477:13)

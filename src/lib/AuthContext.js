@@ -14,13 +14,19 @@ export function AuthProvider({ children }) {
   const fetchProfile = useCallback(async (userId, token) => {
     try {
       // Use our API route to fetch profile (avoids direct Supabase call from browser)
-      const res = await fetch('/api/auth/me', {
+      const res = await fetch('/api/account/me', {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (res.ok) {
         const data = await res.json();
         setProfile(data.profile);
         return data.profile;
+      }
+      if (res.status === 401) {
+        localStorage.removeItem('jamaat_session');
+        setSession(null);
+        setUser(null);
+        setProfile(null);
       }
     } catch (err) {
       console.error('Failed to fetch profile:', err);
@@ -48,7 +54,7 @@ export function AuthProvider({ children }) {
 
   // Sign in via server-side API route (no direct Supabase call from browser)
   const signIn = async (email, password) => {
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch('/api/account/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -68,22 +74,48 @@ export function AuthProvider({ children }) {
   // Sign up via server-side API route, then auto-login
   const signUp = async (email, password, displayName, role = 'admin') => {
     // Step 1: Create the user account
-    const signupRes = await fetch('/api/auth/signup', {
+    const signupRes = await fetch('/api/account/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, displayName }),
     });
-    const signupData = await signupRes.json();
-    if (!signupRes.ok) throw new Error(signupData.error || 'Signup failed');
+    
+    let signupData;
+    try {
+      signupData = await signupRes.json();
+    } catch (err) {
+      throw new Error(`Signup failed to parse response (Status: ${signupRes.status})`);
+    }
+
+    if (!signupRes.ok) {
+      let errStr = 'Signup failed';
+      if (signupData && signupData.error) {
+        errStr = typeof signupData.error === 'string' ? signupData.error : JSON.stringify(signupData.error);
+      }
+      throw new Error(errStr);
+    }
 
     // Step 2: Log in to get a proper session
-    const loginRes = await fetch('/api/auth/login', {
+    const loginRes = await fetch('/api/account/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    const loginData = await loginRes.json();
-    if (!loginRes.ok) throw new Error(loginData.error || 'Account created but login failed. Try signing in.');
+    
+    let loginData;
+    try {
+      loginData = await loginRes.json();
+    } catch (err) {
+      throw new Error(`Login failed to parse response (Status: ${loginRes.status})`);
+    }
+
+    if (!loginRes.ok) {
+      let errStr = 'Account created but login failed. Try signing in.';
+      if (loginData && loginData.error) {
+         errStr = typeof loginData.error === 'string' ? loginData.error : JSON.stringify(loginData.error);
+      }
+      throw new Error(errStr);
+    }
 
     // Save session
     const sessionData = { ...loginData.session, user: loginData.user };

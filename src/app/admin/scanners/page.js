@@ -19,7 +19,7 @@ export default function ScannersPage() {
   const loadScanners = useCallback(async () => {
     setLoadingList(true);
     try {
-      const res = await apiFetch('/api/auth/register-scanner');
+      const res = await apiFetch('/api/account/register-scanner');
       const data = await res.json();
       setScanners(data.scanners || []);
     } catch (err) {
@@ -42,7 +42,7 @@ export default function ScannersPage() {
 
     setCreating(true);
     try {
-      const res = await apiFetch('/api/auth/register-scanner', {
+      const res = await apiFetch('/api/account/register-scanner', {
         method: 'POST',
         body: JSON.stringify({ email, password, displayName }),
       });
@@ -70,7 +70,7 @@ export default function ScannersPage() {
     }
 
     try {
-      const res = await apiFetch(`/api/auth/register-scanner?id=${scanner.id}`, {
+      const res = await apiFetch(`/api/account/register-scanner?id=${scanner.id}`, {
         method: 'DELETE',
       });
       if (res.ok) {

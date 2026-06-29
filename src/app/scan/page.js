@@ -22,10 +22,22 @@ export default function ScanPage() {
 
   // Auth guard
   useEffect(() => {
-    if (!loading && !user) {
+    if (loading) return;
+
+    if (!user) {
       router.replace('/login');
+      return;
     }
-  }, [user, loading, router]);
+
+    if (!profile) {
+      router.replace('/');
+      return;
+    }
+
+    if (profile.role === 'admin') {
+      router.replace('/admin');
+    }
+  }, [user, profile, loading, router]);
 
   // Load active event
   const loadActiveEvent = useCallback(async () => {
@@ -149,7 +161,7 @@ export default function ScanPage() {
     }
   };
 
-  if (loading || !profile) {
+  if (loading) {
     return (
       <div className="lock-screen">
         <div className="lock-icon">🕌</div>
