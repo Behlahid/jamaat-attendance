@@ -72,6 +72,9 @@ CREATE INDEX IF NOT EXISTS idx_events_date ON events(event_date DESC);
 CREATE INDEX IF NOT EXISTS idx_events_active ON events(is_active) WHERE is_active = true;
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
 
+-- Security: only one admin account allowed (prevents race condition in signup)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_single_admin ON profiles (role) WHERE role = 'admin';
+
 -- ══════════════════════════════════════════════════════════════
 --  ROW LEVEL SECURITY (RLS)
 -- ══════════════════════════════════════════════════════════════

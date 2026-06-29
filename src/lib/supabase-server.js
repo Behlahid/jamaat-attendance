@@ -1,68 +1,62 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Server-side Supabase client with service role key
-// This has FULL access — only use in API routes, never in the browser
-export function createServerClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Singleton: reuse across requests to avoid per-request allocation
+let _serverClient = null;
 
-  if (!url || !serviceKey) {
+/** Service-role client — bypasses RLS. API routes only, never in browser. */
+export function createServerClient() {
+  if (_serverClient) return _serverClient;
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !key) {
     throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
   }
 
-  return createClient(url, serviceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
+  _serverClient = createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
   });
+
+  return _serverClient;
 }
 
-// Helper: verify access token and get user + profile
+const AUTH_RESULT = (user, profile, error) => ({ user, profile, error });
+
+/** Extract Bearer token → verify → return { user, profile, error } */
 export async function getAuthUser(request) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { user: null, profile: null, error: 'No authorization token' };
+  const header = request.headers.get('Authorization');
+  if (!header?.startsWith('Bearer ')) {
+    return AUTH_RESULT(null, null, 'No authorization token');
   }
 
-  const token = authHeader.replace('Bearer ', '');
   const supabase = createServerClient();
+  const { data: { user }, error } = await supabase.auth.getUser(header.slice(7));
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !user) {
-    return { user: null, profile: null, error: 'Invalid token' };
-  }
+  if (error || !user) return AUTH_RESULT(null, null, 'Invalid token');
 
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id, display_name, role, created_at')
     .eq('id', user.id)
     .single();
 
-  if (profileError || !profile) {
-    return { user, profile: null, error: 'Profile not found' };
-  }
+  if (!profile) return AUTH_RESULT(user, null, 'Profile not found');
 
-  return { user, profile, error: null };
+  return AUTH_RESULT(user, profile, null);
 }
 
-// Helper: require admin role
-export async function requireAdmin(request) {
-  const { user, profile, error } = await getAuthUser(request);
-  if (error) {
-    return { user: null, profile: null, error };
-  }
-  if (profile.role !== 'admin') {
-    return { user, profile, error: 'Admin access required' };
-  }
-  return { user, profile, error: null };
-}
-
-// Helper: require any authenticated user
+/** Guard: require any authenticated user */
 export async function requireAuth(request) {
-  const { user, profile, error } = await getAuthUser(request);
-  if (error) {
-    return { user: null, profile: null, error };
+  return getAuthUser(request);
+}
+
+/** Guard: require admin role */
+export async function requireAdmin(request) {
+  const result = await getAuthUser(request);
+  if (result.error) return result;
+  if (result.profile.role !== 'admin') {
+    return AUTH_RESULT(result.user, result.profile, 'Admin access required');
   }
-  return { user, profile, error: null };
+  return result;
 }

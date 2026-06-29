@@ -11,73 +11,91 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(null);
 
-  const fetchProfile = useCallback(async (userId) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
-    if (!error && data) {
-      setProfile(data);
+  const fetchProfile = useCallback(async (userId, token) => {
+    try {
+      // Use our API route to fetch profile (avoids direct Supabase call from browser)
+      const res = await fetch('/api/auth/me', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(data.profile);
+        return data.profile;
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile:', err);
     }
-    return data;
+    return null;
   }, []);
 
+  // On mount, check for saved session in localStorage
   useEffect(() => {
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) {
-        fetchProfile(s.user.id).finally(() => setLoading(false));
-      } else {
+    const savedSession = localStorage.getItem('jamaat_session');
+    if (savedSession) {
+      try {
+        const parsed = JSON.parse(savedSession);
+        setSession(parsed);
+        setUser(parsed.user);
+        fetchProfile(parsed.user.id, parsed.access_token).finally(() => setLoading(false));
+      } catch {
+        localStorage.removeItem('jamaat_session');
         setLoading(false);
       }
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, s) => {
-        setSession(s);
-        setUser(s?.user ?? null);
-        if (s?.user) {
-          await fetchProfile(s.user.id);
-        } else {
-          setProfile(null);
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
+    } else {
+      setLoading(false);
+    }
   }, [fetchProfile]);
 
+  // Sign in via server-side API route (no direct Supabase call from browser)
   const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
     });
-    if (error) throw error;
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+
+    // Save session
+    const sessionData = { ...data.session, user: data.user };
+    localStorage.setItem('jamaat_session', JSON.stringify(sessionData));
+    setSession(sessionData);
+    setUser(data.user);
+    setProfile(data.profile);
     return data;
   };
 
+  // Sign up via server-side API route, then auto-login
   const signUp = async (email, password, displayName, role = 'admin') => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          display_name: displayName,
-          role: role,
-        },
-      },
+    // Step 1: Create the user account
+    const signupRes = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, displayName }),
     });
-    if (error) throw error;
-    return data;
+    const signupData = await signupRes.json();
+    if (!signupRes.ok) throw new Error(signupData.error || 'Signup failed');
+
+    // Step 2: Log in to get a proper session
+    const loginRes = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const loginData = await loginRes.json();
+    if (!loginRes.ok) throw new Error(loginData.error || 'Account created but login failed. Try signing in.');
+
+    // Save session
+    const sessionData = { ...loginData.session, user: loginData.user };
+    localStorage.setItem('jamaat_session', JSON.stringify(sessionData));
+    setSession(sessionData);
+    setUser(loginData.user);
+    setProfile(loginData.profile);
+    return loginData;
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem('jamaat_session');
     setUser(null);
     setProfile(null);
     setSession(null);
@@ -111,7 +129,7 @@ export function AuthProvider({ children }) {
     signOut,
     getAccessToken,
     apiFetch,
-    refreshProfile: () => user && fetchProfile(user.id),
+    refreshProfile: () => user && fetchProfile(user.id, session?.access_token),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

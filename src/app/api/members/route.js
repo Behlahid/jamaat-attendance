@@ -9,8 +9,8 @@ export async function GET(request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get('page') || '1');
-  const limit = parseInt(searchParams.get('limit') || '50');
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1') || 1);
+  const limit = Math.min(200, Math.max(1, parseInt(searchParams.get('limit') || '50') || 50));
   const search = searchParams.get('search') || '';
   const offset = (page - 1) * limit;
 
@@ -19,10 +19,13 @@ export async function GET(request) {
     let query = supabase.from('members').select('*', { count: 'exact' });
 
     if (search.trim()) {
-      // Search by name, its_id, hfid, or barcode
-      query = query.or(
-        `name.ilike.%${search}%,its_id.ilike.%${search}%,hfid.ilike.%${search}%,back_barcode.ilike.%${search}%`
-      );
+      // Sanitize: strip PostgREST filter operators to prevent injection
+      const s = search.replace(/[%_\\,()."']/g, '').trim();
+      if (s) {
+        query = query.or(
+          `name.ilike.%${s}%,its_id.ilike.%${s}%,hfid.ilike.%${s}%,back_barcode.ilike.%${s}%`
+        );
+      }
     }
 
     const { data, error: fetchError, count } = await query

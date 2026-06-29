@@ -1,6 +1,9 @@
 import { createServerClient, requireAuth, requireAdmin } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const VALID_METHODS = ['manual', 'nfc'];
+
 // POST /api/attendance — Mark attendance
 export async function POST(request) {
   const { profile, error } = await requireAuth(request);
@@ -8,7 +11,12 @@ export async function POST(request) {
     return NextResponse.json({ error }, { status: 401 });
   }
 
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
   const { eventId, identifier, method = 'manual' } = body;
 
   if (!eventId || !identifier) {
@@ -18,9 +26,22 @@ export async function POST(request) {
     );
   }
 
+  if (!UUID_RE.test(eventId)) {
+    return NextResponse.json({ error: 'Invalid event ID format' }, { status: 400 });
+  }
+
+  if (!VALID_METHODS.includes(method)) {
+    return NextResponse.json({ error: 'Invalid method. Must be manual or nfc.' }, { status: 400 });
+  }
+
   try {
     const supabase = createServerClient();
-    const cleanId = String(identifier).trim().replace(/^['"]+|['"]+$/g, '');
+    // Sanitize identifier: strip PostgREST special chars
+    const cleanId = String(identifier).trim().replace(/[,()."'\\%]/g, '');
+
+    if (!cleanId) {
+      return NextResponse.json({ error: 'Invalid identifier' }, { status: 400 });
+    }
 
     // Find member by ITS ID, barcode, or HFID
     const { data: member, error: memberError } = await supabase
@@ -93,6 +114,9 @@ export async function GET(request) {
   if (!eventId) {
     return NextResponse.json({ error: 'Event ID required' }, { status: 400 });
   }
+  if (!UUID_RE.test(eventId)) {
+    return NextResponse.json({ error: 'Invalid event ID format' }, { status: 400 });
+  }
 
   try {
     const supabase = createServerClient();
@@ -135,6 +159,9 @@ export async function DELETE(request) {
 
   if (!id) {
     return NextResponse.json({ error: 'Attendance ID required' }, { status: 400 });
+  }
+  if (!UUID_RE.test(id)) {
+    return NextResponse.json({ error: 'Invalid attendance ID format' }, { status: 400 });
   }
 
   try {

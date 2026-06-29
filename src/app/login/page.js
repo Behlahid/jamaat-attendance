@@ -60,7 +60,15 @@ export default function LoginPage() {
         await signIn(email, password);
       }
     } catch (err) {
-      setError(err.message || 'Login failed');
+      console.error('Auth error (full object):', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+      let msg = 'Something went wrong. Please try again.';
+      if (typeof err === 'string') msg = err;
+      else if (err?.message && err.message !== '{}') msg = err.message;
+      else if (err?.error_description) msg = err.error_description;
+      else if (err?.msg) msg = err.msg;
+      else if (err?.error) msg = typeof err.error === 'string' ? err.error : JSON.stringify(err.error);
+      else msg = JSON.stringify(err);
+      setError(msg);
     }
     setSubmitting(false);
   };
