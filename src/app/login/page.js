@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
+import InstallPrompt from '@/components/InstallPrompt';
 import {
   Landmark,
   Wrench,
@@ -211,6 +212,8 @@ export default function LoginPage() {
             </div>
           )}
         </form>
+
+        <InstallPrompt />
 
         <div className="auth-credit">BEHLAH</div>
       </div>

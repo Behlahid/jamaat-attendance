@@ -20,7 +20,7 @@ export default function RootLayout({ children }) {
         <meta name="theme-color" content="#1a6b3c" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕌</text></svg>" />
+        <meta name="apple-mobile-web-app-title" content="Attendance" />
       </head>
       <body>
         <AuthProvider>
