@@ -5,6 +5,23 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
 import { playSuccess, playLate, playError } from '@/lib/audio';
+import {
+  ScanLine,
+  LogOut,
+  MapPin,
+  DoorOpen,
+  ChevronDown,
+  PlayCircle,
+  AlertTriangle,
+  StopCircle,
+  Hourglass,
+  CheckCircle2,
+  Nfc,
+  Loader2,
+  Users,
+  UserCheck,
+  UserX,
+} from 'lucide-react';
 
 export default function ScanPage() {
   const { user, profile, loading, signOut, apiFetch } = useAuth();
@@ -80,12 +97,12 @@ export default function ScanPage() {
   // Mark attendance
   const markAttendance = async (id, method = 'manual') => {
     if (!activeEvent) {
-      showToast('❌ No active event', 'error');
+      showToast('No active event', 'error');
       playError();
       return;
     }
     if (!gate) {
-      showToast('❌ Please select a gate first', 'error');
+      showToast('Please select a gate first', 'error');
       playError();
       return;
     }
@@ -107,10 +124,10 @@ export default function ScanPage() {
       if (res.ok) {
         const shortName = data.member.name.split(' ').slice(0, 4).join(' ');
         if (data.record.status === 'late') {
-          showToast(`⚠️ LATE: ${shortName}`, 'info');
+          showToast(`LATE: ${shortName}`, 'info');
           playLate();
         } else {
-          showToast(`✅ ${shortName}`, 'success');
+          showToast(shortName, 'success');
           playSuccess();
         }
         setScanCount((c) => c + 1);
@@ -119,16 +136,16 @@ export default function ScanPage() {
         if (navigator.vibrate) navigator.vibrate(100);
       } else if (res.status === 409) {
         const shortName = data.member.name.split(' ').slice(0, 3).join(' ');
-        showToast(`⚠️ Already marked: ${shortName}`, 'error');
+        showToast(`Already marked: ${shortName}`, 'error');
         playError();
         if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
       } else {
-        showToast(`❌ ${data.error}: ${id}`, 'error');
+        showToast(`${data.error}: ${id}`, 'error');
         playError();
         if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
       }
     } catch (err) {
-      showToast('❌ Network error', 'error');
+      showToast('Network error', 'error');
       playError();
     }
     setSubmitting(false);
@@ -139,13 +156,13 @@ export default function ScanPage() {
   // NFC scanning
   const startNFC = async () => {
     if (!gate) {
-      showToast('❌ Please select a gate first', 'error');
+      showToast('Please select a gate first', 'error');
       playError();
       return;
     }
 
     if (!('NDEFReader' in window)) {
-      showToast('📱 NFC needs Chrome on Android', 'error');
+      showToast('NFC needs Chrome on Android', 'error');
       return;
     }
 
@@ -162,7 +179,7 @@ export default function ScanPage() {
       await ndef.scan({ signal: abort.signal });
       setNfcScanning(true);
       setNfcAbort(abort);
-      showToast('📡 Ready — tap an NFC card now', 'info');
+      showToast('Ready — tap an NFC card now', 'info');
 
       ndef.addEventListener('reading', ({ message, serialNumber }) => {
         let marked = false;
@@ -199,24 +216,24 @@ export default function ScanPage() {
       });
 
       ndef.addEventListener('readingerror', () => {
-        showToast('❌ Unformatted or unsupported card. Cannot read.', 'error');
+        showToast('Unformatted or unsupported card. Cannot read.', 'error');
       });
     } catch (e) {
       setNfcScanning(false);
       setNfcAbort(null);
       if (e.name === 'NotAllowedError') {
-        showToast('❌ NFC permission denied', 'error');
+        showToast('NFC permission denied', 'error');
       } else {
-        showToast(`❌ NFC error: ${e.message}`, 'error');
+        showToast(`NFC error: ${e.message}`, 'error');
       }
     }
   };
 
   if (loading) {
     return (
-      <div className="lock-screen">
-        <div className="lock-icon">🕌</div>
-        <div className="lock-title">Loading…</div>
+      <div className="auth-loading">
+        <Loader2 />
+        <div className="auth-loading-title">Loading…</div>
       </div>
     );
   }
@@ -225,14 +242,14 @@ export default function ScanPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       {/* Header */}
       <header className="app-header">
-        <div className="hdr-icon">📱</div>
+        <div className="hdr-icon"><ScanLine /></div>
         <div className="hdr-info">
           <h1>Scanner</h1>
           <p>{profile?.display_name}</p>
         </div>
         <div className="hdr-right">
           <button className="lock-btn" onClick={signOut}>
-            🚪 Logout
+            <LogOut /> Logout
           </button>
         </div>
       </header>
@@ -244,7 +261,7 @@ export default function ScanPage() {
             <div className="event-bar">
               <div>
                 <div className="event-label">Active Event</div>
-                <div className="event-name">📌 {activeEvent.name}</div>
+                <div className="event-name"><MapPin /> {activeEvent.name}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div className="event-label">
@@ -254,46 +271,52 @@ export default function ScanPage() {
                 </div>
               </div>
             </div>
-            
+
             {(activeEvent.start_time || activeEvent.end_time || activeEvent.late_time) && (
-              <div style={{ padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: '14px', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text)' }}>
-                  <span>🟢 Starts:</span>
-                  <span>{activeEvent.start_time ? new Date(activeEvent.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Not set'}</span>
+              <div className="time-panel">
+                <div className="time-row start">
+                  <span className="time-row-icon"><PlayCircle /></span>
+                  <span className="time-row-label">Starts</span>
+                  <span className="time-row-value">{activeEvent.start_time ? new Date(activeEvent.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Not set'}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--orange)' }}>
-                  <span>⚠️ Late After:</span>
-                  <span>{activeEvent.late_time ? new Date(activeEvent.late_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Not set'}</span>
+                <div className="time-row late">
+                  <span className="time-row-icon"><AlertTriangle /></span>
+                  <span className="time-row-label">Late After</span>
+                  <span className="time-row-value">{activeEvent.late_time ? new Date(activeEvent.late_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Not set'}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--red)' }}>
-                  <span>🛑 Ends:</span>
-                  <span>{activeEvent.end_time ? new Date(activeEvent.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Not set'}</span>
+                <div className="time-row end">
+                  <span className="time-row-icon"><StopCircle /></span>
+                  <span className="time-row-label">Ends</span>
+                  <span className="time-row-value">{activeEvent.end_time ? new Date(activeEvent.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Not set'}</span>
                 </div>
               </div>
             )}
 
             {/* Gate Selector */}
-            <div className="panel" style={{ padding: '12px 14px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '20px' }}>🚪</span>
-              <select 
-                value={gate} 
-                onChange={handleGateChange}
-                style={{ flex: 1, padding: '8px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--border)', background: 'var(--card)', color: 'var(--text)', fontSize: '14px', fontWeight: 'bold' }}
-              >
-                <option value="" disabled>Select your gate...</option>
-                <option value="Gents Main Gate">Gents Main Gate</option>
-                <option value="Gents Gate 2">Gents Gate 2</option>
-                <option value="Ladies Main Gate">Ladies Main Gate</option>
-                <option value="Ladies Gate 2">Ladies Gate 2</option>
-                <option value="VIP Gate">VIP Gate</option>
-                <option value="Office">Office / Late Entry</option>
-              </select>
+            <div className="panel" style={{ padding: '12px 14px', marginBottom: '14px' }}>
+              <div className="field-icon-wrap">
+                <span className="field-icon"><DoorOpen /></span>
+                <select
+                  value={gate}
+                  onChange={handleGateChange}
+                  className="gate-select"
+                >
+                  <option value="" disabled>Select your gate...</option>
+                  <option value="Gents Main Gate">Gents Main Gate</option>
+                  <option value="Gents Gate 2">Gents Gate 2</option>
+                  <option value="Ladies Main Gate">Ladies Main Gate</option>
+                  <option value="Ladies Gate 2">Ladies Gate 2</option>
+                  <option value="VIP Gate">VIP Gate</option>
+                  <option value="Office">Office / Late Entry</option>
+                </select>
+                <span className="gate-chevron"><ChevronDown /></span>
+              </div>
             </div>
           </>
         ) : (
-          <div className="panel" style={{ textAlign: 'center', padding: 30 }}>
-            <div style={{ fontSize: 40, marginBottom: 10 }}>⏳</div>
-            <div style={{ fontWeight: 700, marginBottom: 4 }}>No Active Event</div>
+          <div className="panel empty-state">
+            <div className="empty-icon"><Hourglass /></div>
+            <div style={{ fontWeight: 700, marginBottom: 4, color: 'var(--text)' }}>No Active Event</div>
             <div className="text-muted text-sm">
               Ask the admin to create and activate an event.
             </div>
@@ -303,14 +326,17 @@ export default function ScanPage() {
         {/* Stats */}
         <div className="stats-row">
           <div className="stat-card present">
+            <span className="stat-icon"><UserCheck /></span>
             <div className="stat-num">{scanCount}</div>
             <div className="stat-label">Scanned</div>
           </div>
           <div className="stat-card">
+            <span className="stat-icon"><Users /></span>
             <div className="stat-num">{totalMembers}</div>
             <div className="stat-label">Total</div>
           </div>
           <div className="stat-card absent">
+            <span className="stat-icon"><UserX /></span>
             <div className="stat-num">{totalMembers - scanCount}</div>
             <div className="stat-label">Remaining</div>
           </div>
@@ -319,7 +345,7 @@ export default function ScanPage() {
         {/* Scan Input */}
         {activeEvent && (
           <div className="panel">
-            <div className="panel-title">📲 Scan Attendance</div>
+            <div className="panel-title"><ScanLine /> Scan Attendance</div>
             <div className="input-row">
               <input
                 ref={inputRef}
@@ -340,7 +366,7 @@ export default function ScanPage() {
                 onClick={() => markAttendance(identifier, 'manual')}
                 disabled={submitting || !identifier.trim()}
               >
-                ✓ Mark
+                <CheckCircle2 /> Mark
               </button>
             </div>
 
@@ -348,7 +374,7 @@ export default function ScanPage() {
               className={`nfc-btn ${nfcScanning ? 'scanning' : ''}`}
               onClick={startNFC}
             >
-              <span>📡</span>
+              <Nfc />
               <span>
                 {nfcScanning ? 'Scanning… tap again to stop' : 'Scan NFC Card'}
               </span>
@@ -362,9 +388,7 @@ export default function ScanPage() {
             background: 'var(--green-light)',
             border: '1px solid rgba(46,139,87,0.2)',
           }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--green)', marginBottom: 4 }}>
-              LAST SCAN
-            </div>
+            <div className="last-scan-label"><CheckCircle2 /> LAST SCAN</div>
             <div style={{ fontSize: 14, fontWeight: 800 }}>{lastScan.name}</div>
             <div className="text-muted text-xs" style={{ marginTop: 2 }}>
               ITS: {lastScan.its_id} · {lastScan.time.toLocaleTimeString('en-GB', {
@@ -375,14 +399,7 @@ export default function ScanPage() {
         )}
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '40px', paddingBottom: '20px' }}>
-        <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', color: 'gray', fontWeight: 700, marginBottom: '2px' }}>
-          Engineered By
-        </div>
-        <div style={{ fontSize: '15px', fontWeight: 900, background: 'linear-gradient(135deg, #0070f3, #7928ca)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '0.5px' }}>
-          BEHLAH
-        </div>
-      </div>
+      <div className="page-credit">BEHLAH</div>
 
       {ToastComponent}
     </div>

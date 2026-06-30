@@ -1,6 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { CheckCircle2, XCircle, Info } from 'lucide-react';
+
+const TOAST_ICONS = {
+  success: CheckCircle2,
+  error: XCircle,
+  info: Info,
+};
 
 export default function Toast({ message, type = 'success', onDismiss }) {
   const [visible, setVisible] = useState(false);
@@ -18,9 +25,12 @@ export default function Toast({ message, type = 'success', onDismiss }) {
 
   if (!message) return null;
 
+  const Icon = TOAST_ICONS[type] || Info;
+
   return (
     <div className={`toast ${visible ? 'show' : ''} ${type}`}>
-      {message}
+      <Icon className="toast-icon" />
+      <span>{message}</span>
     </div>
   );
 }
