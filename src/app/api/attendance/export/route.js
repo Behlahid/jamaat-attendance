@@ -25,17 +25,36 @@ export async function GET(request) {
       .eq('id', eventId)
       .single();
 
-    // Get all members
-    const { data: members } = await supabase
-      .from('members')
-      .select('*')
-      .order('name');
+    // Get all members (handle 1000 limit)
+    let members = [];
+    let mFrom = 0;
+    const limit = 1000;
+    while (true) {
+      const { data: chunk } = await supabase
+        .from('members')
+        .select('*')
+        .order('name')
+        .range(mFrom, mFrom + limit - 1);
+      if (!chunk || chunk.length === 0) break;
+      members = members.concat(chunk);
+      if (chunk.length < limit) break;
+      mFrom += limit;
+    }
 
-    // Get attendance for this event
-    const { data: attendance } = await supabase
-      .from('attendance')
-      .select('*, profiles:scanned_by(display_name)')
-      .eq('event_id', eventId);
+    // Get attendance for this event (handle 1000 limit)
+    let attendance = [];
+    let aFrom = 0;
+    while (true) {
+      const { data: chunk } = await supabase
+        .from('attendance')
+        .select('*, profiles:scanned_by(display_name)')
+        .eq('event_id', eventId)
+        .range(aFrom, aFrom + limit - 1);
+      if (!chunk || chunk.length === 0) break;
+      attendance = attendance.concat(chunk);
+      if (chunk.length < limit) break;
+      aFrom += limit;
+    }
 
     // Build attendance lookup
     const attendanceMap = {};
@@ -50,9 +69,28 @@ export async function GET(request) {
     (members || []).forEach((m) => {
       const a = attendanceMap[m.id];
       const status = a ? 'Present' : 'Absent';
-      const time = a ? new Date(a.marked_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+      
+      let time = '';
+      if (a && a.marked_at) {
+        time = new Date(a.marked_at).toLocaleTimeString('en-US', {
+          timeZone: 'Asia/Kolkata',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        });
+      }
+
       const method = a ? a.method : '';
-      const scannedBy = a?.profiles?.display_name || '';
+      
+      let scannedBy = '';
+      if (a?.profiles) {
+        if (Array.isArray(a.profiles)) {
+          scannedBy = a.profiles[0]?.display_name || '';
+        } else {
+          scannedBy = a.profiles.display_name || '';
+        }
+      }
 
       csv += [
         esc(m.its_id),
