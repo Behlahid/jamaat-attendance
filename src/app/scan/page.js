@@ -16,7 +16,6 @@ import {
   StopCircle,
   Hourglass,
   CheckCircle2,
-  Nfc,
   Loader2,
   Users,
   UserCheck,
@@ -370,15 +369,7 @@ export default function ScanPage() {
               </button>
             </div>
 
-            <button
-              className={`nfc-btn ${nfcScanning ? 'scanning' : ''}`}
-              onClick={startNFC}
-            >
-              <Nfc />
-              <span>
-                {nfcScanning ? 'Scanning… tap again to stop' : 'Scan NFC Card'}
-              </span>
-            </button>
+            {/* NFC scanning temporarily disabled — startNFC()/state kept intact to re-enable later */}
           </div>
         )}
 
