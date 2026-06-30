@@ -69,7 +69,7 @@ export async function POST(request) {
     // Fetch event to check times and restrictions
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .select('end_time, late_time, is_restricted')
+      .select('start_time, end_time, late_time, is_restricted')
       .eq('id', eventId)
       .single();
 
@@ -78,6 +78,9 @@ export async function POST(request) {
     }
 
     const now = new Date();
+    if (event.start_time && now < new Date(event.start_time)) {
+      return NextResponse.json({ error: 'Event has not started yet' }, { status: 403 });
+    }
     if (event.end_time && now > new Date(event.end_time)) {
       return NextResponse.json({ error: 'Event has ended' }, { status: 403 });
     }

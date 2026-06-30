@@ -37,12 +37,21 @@ export default function ScanPage() {
   const [nfcAbort, setNfcAbort] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [gate, setGate] = useState('');
+  const [, setClockTick] = useState(0);
 
   // Load saved gate
   useEffect(() => {
     const savedGate = localStorage.getItem('jamaat_scanner_gate');
     if (savedGate) setGate(savedGate);
   }, []);
+
+  // Re-check start time periodically so scanning unlocks automatically once the event begins
+  useEffect(() => {
+    const t = setInterval(() => setClockTick((c) => c + 1), 15000);
+    return () => clearInterval(t);
+  }, []);
+
+  const eventNotStarted = !!(activeEvent?.start_time && new Date() < new Date(activeEvent.start_time));
 
   const handleGateChange = (e) => {
     setGate(e.target.value);
@@ -97,6 +106,11 @@ export default function ScanPage() {
   const markAttendance = async (id, method = 'manual') => {
     if (!activeEvent) {
       showToast('No active event', 'error');
+      playError();
+      return;
+    }
+    if (eventNotStarted) {
+      showToast('Event has not started yet', 'error');
       playError();
       return;
     }
@@ -345,31 +359,45 @@ export default function ScanPage() {
         {activeEvent && (
           <div className="panel">
             <div className="panel-title"><ScanLine /> Scan Attendance</div>
-            <div className="input-row">
-              <input
-                ref={inputRef}
-                className="id-input"
-                type="text"
-                inputMode="numeric"
-                placeholder="Enter ITS ID…"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') markAttendance(identifier, 'manual');
-                }}
-                disabled={submitting}
-                autoFocus
-              />
-              <button
-                className="mark-btn"
-                onClick={() => markAttendance(identifier, 'manual')}
-                disabled={submitting || !identifier.trim()}
-              >
-                <CheckCircle2 /> Mark
-              </button>
-            </div>
+            {eventNotStarted ? (
+              <div className="empty-state" style={{ padding: '20px 10px' }}>
+                <div className="empty-icon"><PlayCircle /></div>
+                <div style={{ color: 'var(--text)', fontWeight: 700 }}>Scanning opens at start time</div>
+                <div className="text-muted text-sm">
+                  {activeEvent.start_time
+                    ? `Starts at ${new Date(activeEvent.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`
+                    : 'Waiting for the event to start'}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="input-row">
+                  <input
+                    ref={inputRef}
+                    className="id-input"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="Enter ITS ID…"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') markAttendance(identifier, 'manual');
+                    }}
+                    disabled={submitting}
+                    autoFocus
+                  />
+                  <button
+                    className="mark-btn"
+                    onClick={() => markAttendance(identifier, 'manual')}
+                    disabled={submitting || !identifier.trim()}
+                  >
+                    <CheckCircle2 /> Mark
+                  </button>
+                </div>
 
-            {/* NFC scanning temporarily disabled — startNFC()/state kept intact to re-enable later */}
+                {/* NFC scanning temporarily disabled — startNFC()/state kept intact to re-enable later */}
+              </>
+            )}
           </div>
         )}
 
