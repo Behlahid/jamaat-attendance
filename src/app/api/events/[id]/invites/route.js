@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 // GET /api/events/[id]/invites — Get restricted status and count
 export async function GET(request, { params }) {
+  const { id } = await params;
   const { error } = await requireAdmin(request);
   if (error) return NextResponse.json({ error }, { status: 403 });
 
@@ -12,7 +13,7 @@ export async function GET(request, { params }) {
     const { data: event, error: eventErr } = await supabase
       .from('events')
       .select('is_restricted')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
     
     if (eventErr) return NextResponse.json({ error: eventErr.message }, { status: 500 });
@@ -20,7 +21,7 @@ export async function GET(request, { params }) {
     const { count, error: countErr } = await supabase
       .from('event_members')
       .select('*', { count: 'exact', head: true })
-      .eq('event_id', params.id);
+      .eq('event_id', id);
 
     return NextResponse.json({ is_restricted: event.is_restricted, count: count || 0 });
   } catch (err) {
@@ -30,6 +31,7 @@ export async function GET(request, { params }) {
 
 // POST /api/events/[id]/invites — Toggle restricted status, or upload ITS IDs
 export async function POST(request, { params }) {
+  const { id } = await params;
   const { error } = await requireAdmin(request);
   if (error) return NextResponse.json({ error }, { status: 403 });
 
@@ -40,7 +42,7 @@ export async function POST(request, { params }) {
     const supabase = createServerClient();
 
     if (is_restricted !== undefined) {
-      await supabase.from('events').update({ is_restricted }).eq('id', params.id);
+      await supabase.from('events').update({ is_restricted }).eq('id', id);
     }
 
     if (its_ids && Array.isArray(its_ids)) {
@@ -53,11 +55,11 @@ export async function POST(request, { params }) {
       if (memErr) return NextResponse.json({ error: memErr.message }, { status: 500 });
       
       // Delete old invites
-      await supabase.from('event_members').delete().eq('event_id', params.id);
+      await supabase.from('event_members').delete().eq('event_id', id);
 
       // Insert new invites
       if (members.length > 0) {
-        const inserts = members.map(m => ({ event_id: params.id, member_id: m.id }));
+        const inserts = members.map(m => ({ event_id: id, member_id: m.id }));
         // Batch insert in chunks of 1000
         for (let i = 0; i < inserts.length; i += 1000) {
           const chunk = inserts.slice(i, i + 1000);
