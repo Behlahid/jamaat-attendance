@@ -177,7 +177,7 @@ export default function ScanPage() {
         <div className="hdr-icon">📱</div>
         <div className="hdr-info">
           <h1>Scanner</h1>
-          <p>{profile.display_name}</p>
+          <p>{profile?.display_name}</p>
         </div>
         <div className="hdr-right">
           <button className="lock-btn" onClick={signOut}>

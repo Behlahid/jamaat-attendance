@@ -131,6 +131,11 @@ export function AuthProvider({ children }) {
     setUser(null);
     setProfile(null);
     setSession(null);
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error('Supabase signOut error:', err);
+    }
   };
 
   const getAccessToken = () => {

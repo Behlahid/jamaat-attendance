@@ -50,7 +50,7 @@ export default function AdminLayout({ children }) {
         <div className="hdr-icon">👑</div>
         <div className="hdr-info">
           <h1>Jamaat Attendance</h1>
-          <p>Admin · {profile.display_name}</p>
+          <p>Admin · {profile?.display_name}</p>
         </div>
         <div className="hdr-right">
           <div className="date-badge">
