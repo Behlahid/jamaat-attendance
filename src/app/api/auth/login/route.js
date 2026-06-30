@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 
 // ── Rate limiter with automatic eviction ──
 const IS_DEV = process.env.NODE_ENV !== 'production';
@@ -68,7 +69,15 @@ export async function POST(request) {
       return fail('Login succeeded but profile not found', 500);
     }
 
-    return json({ success: true, session: data.session, user: data.user, profile });
+    const sessionToken = randomUUID();
+    await serverClient
+      .from('profiles')
+      .update({ current_session_token: sessionToken })
+      .eq('id', data.user.id);
+
+    profile.current_session_token = sessionToken;
+
+    return json({ success: true, session: data.session, user: data.user, profile, session_token: sessionToken });
   } catch (err) {
     console.error('Login error:', err);
     return fail(err.message || 'Login failed', 500);

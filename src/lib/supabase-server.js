@@ -29,11 +29,17 @@ export async function getAuthUser(request) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, display_name, role, created_at')
+    .select('id, display_name, role, created_at, current_session_token')
     .eq('id', user.id)
     .single();
 
   if (!profile) return AUTH_RESULT(user, null, 'Profile not found');
+
+  // Enforce Single-Device Login
+  const clientToken = request.headers.get('X-Session-Token');
+  if (clientToken && profile.current_session_token && clientToken !== profile.current_session_token) {
+    return AUTH_RESULT(null, null, 'Session invalidated by another device');
+  }
 
   return AUTH_RESULT(user, profile, null);
 }

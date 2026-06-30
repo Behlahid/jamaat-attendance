@@ -63,7 +63,7 @@ export function AuthProvider({ children }) {
     if (!res.ok) throw new Error(data.error || 'Login failed');
 
     // Save session
-    const sessionData = { ...data.session, user: data.user };
+    const sessionData = { ...data.session, user: data.user, session_token: data.session_token };
     localStorage.setItem('jamaat_session', JSON.stringify(sessionData));
     setSession(sessionData);
     setUser(data.user);
@@ -118,7 +118,7 @@ export function AuthProvider({ children }) {
     }
 
     // Save session
-    const sessionData = { ...loginData.session, user: loginData.user };
+    const sessionData = { ...loginData.session, user: loginData.user, session_token: loginData.session_token };
     localStorage.setItem('jamaat_session', JSON.stringify(sessionData));
     setSession(sessionData);
     setUser(loginData.user);
@@ -148,9 +148,17 @@ export function AuthProvider({ children }) {
     const headers = {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(session?.session_token ? { 'X-Session-Token': session.session_token } : {}),
       ...options.headers,
     };
     const res = await fetch(url, { ...options, headers });
+    
+    // Auto logout if session hijacked or invalid
+    if (res.status === 401) {
+      localStorage.removeItem('jamaat_session');
+      window.location.href = '/login';
+    }
+    
     return res;
   };
 
