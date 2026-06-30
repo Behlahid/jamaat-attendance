@@ -68,7 +68,10 @@ export async function GET(request) {
 
     (members || []).forEach((m) => {
       const a = attendanceMap[m.id];
-      const status = a ? 'Present' : 'Absent';
+      let status = 'Absent';
+      if (a) {
+        status = a.status === 'late' ? 'Late' : 'Present';
+      }
       
       let time = '';
       if (a && a.marked_at) {

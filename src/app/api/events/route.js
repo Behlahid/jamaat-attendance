@@ -17,6 +17,7 @@ export async function GET(request) {
 
     if (activeOnly) {
       query = query.eq('is_active', true);
+      // We will do time filtering in JS so we don't break if columns don't exist yet
     }
 
     const { data, error: fetchError } = await query
@@ -38,7 +39,17 @@ export async function GET(request) {
       })
     );
 
-    return NextResponse.json({ events: eventsWithCounts });
+    // Filter out expired events if activeOnly
+    let filteredEvents = eventsWithCounts;
+    if (activeOnly) {
+      const now = new Date();
+      filteredEvents = eventsWithCounts.filter(ev => {
+        if (!ev.end_time) return true;
+        return new Date(ev.end_time) > now;
+      });
+    }
+
+    return NextResponse.json({ events: filteredEvents });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -52,7 +63,7 @@ export async function POST(request) {
   }
 
   const body = await request.json();
-  const { name, eventDate, notes = '' } = body;
+  const { name, eventDate, notes = '', startTime, lateTime, endTime } = body;
 
   if (!name || !name.trim()) {
     return NextResponse.json({ error: 'Event name is required' }, { status: 400 });
@@ -66,6 +77,9 @@ export async function POST(request) {
       .insert({
         name: name.trim(),
         event_date: eventDate || new Date().toISOString().split('T')[0],
+        start_time: startTime || null,
+        late_time: lateTime || null,
+        end_time: endTime || null,
         notes: notes.trim(),
         is_active: true,
         created_by: profile.id,

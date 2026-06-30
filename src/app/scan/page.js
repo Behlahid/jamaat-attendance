@@ -86,7 +86,11 @@ export default function ScanPage() {
 
       if (res.ok) {
         const shortName = data.member.name.split(' ').slice(0, 4).join(' ');
-        showToast(`✅ ${shortName}`, 'success');
+        if (data.record.status === 'late') {
+          showToast(`⚠️ LATE: ${shortName}`, 'info');
+        } else {
+          showToast(`✅ ${shortName}`, 'success');
+        }
         setScanCount((c) => c + 1);
         setLastScan({ name: data.member.name, its_id: data.member.its_id, time: new Date() });
         // Vibrate on success
@@ -205,19 +209,38 @@ export default function ScanPage() {
       <div className="page-container">
         {/* Active Event */}
         {activeEvent ? (
-          <div className="event-bar">
-            <div>
-              <div className="event-label">Active Event</div>
-              <div className="event-name">📌 {activeEvent.name}</div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div className="event-label">
-                {new Date(activeEvent.event_date).toLocaleDateString('en-GB', {
-                  day: 'numeric', month: 'short', year: 'numeric',
-                })}
+          <>
+            <div className="event-bar">
+              <div>
+                <div className="event-label">Active Event</div>
+                <div className="event-name">📌 {activeEvent.name}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div className="event-label">
+                  {new Date(activeEvent.event_date).toLocaleDateString('en-GB', {
+                    day: 'numeric', month: 'short', year: 'numeric',
+                  })}
+                </div>
               </div>
             </div>
-          </div>
+            
+            {(activeEvent.start_time || activeEvent.end_time || activeEvent.late_time) && (
+              <div style={{ padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: '14px', fontSize: '12px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text)' }}>
+                  <span>🟢 Starts:</span>
+                  <span>{activeEvent.start_time ? new Date(activeEvent.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Not set'}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--orange)' }}>
+                  <span>⚠️ Late After:</span>
+                  <span>{activeEvent.late_time ? new Date(activeEvent.late_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Not set'}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--red)' }}>
+                  <span>🛑 Ends:</span>
+                  <span>{activeEvent.end_time ? new Date(activeEvent.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Not set'}</span>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <div className="panel" style={{ textAlign: 'center', padding: 30 }}>
             <div style={{ fontSize: 40, marginBottom: 10 }}>⏳</div>

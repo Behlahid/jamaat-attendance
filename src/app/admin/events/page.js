@@ -13,6 +13,9 @@ export default function EventsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startTime, setStartTime] = useState('19:00');
+  const [lateTime, setLateTime] = useState('19:45');
+  const [endTime, setEndTime] = useState('23:00');
   const [creating, setCreating] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
@@ -31,14 +34,25 @@ export default function EventsPage() {
     }
     setCreating(true);
     try {
+      // Create local ISO strings
+      const toISO = (timeStr) => timeStr ? new Date(`${newDate}T${timeStr}:00`).toISOString() : null;
       const res = await apiFetch('/api/events', {
         method: 'POST',
-        body: JSON.stringify({ name: newName, eventDate: newDate }),
+        body: JSON.stringify({ 
+          name: newName, 
+          eventDate: newDate,
+          startTime: toISO(startTime),
+          lateTime: toISO(lateTime),
+          endTime: toISO(endTime)
+        }),
       });
       if (res.ok) {
         showToast('✅ Event created!', 'success');
         setShowCreate(false);
         setNewName('');
+        setStartTime('19:00');
+        setLateTime('19:45');
+        setEndTime('23:00');
         loadEvents();
       } else {
         const data = await res.json();
@@ -125,6 +139,38 @@ export default function EventsPage() {
             onChange={(e) => setNewDate(e.target.value)}
             style={{ marginBottom: 10, width: '100%' }}
           />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: 10 }}>
+            <div>
+              <div className="text-xs text-muted mb-2">Start Time</div>
+              <input
+                className="id-input"
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                style={{ width: '100%', padding: '10px' }}
+              />
+            </div>
+            <div>
+              <div className="text-xs text-muted mb-2">Late After</div>
+              <input
+                className="id-input"
+                type="time"
+                value={lateTime}
+                onChange={(e) => setLateTime(e.target.value)}
+                style={{ width: '100%', padding: '10px' }}
+              />
+            </div>
+            <div>
+              <div className="text-xs text-muted mb-2">End Time</div>
+              <input
+                className="id-input"
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                style={{ width: '100%', padding: '10px' }}
+              />
+            </div>
+          </div>
           <div className="action-row">
             <button className="action-btn secondary" onClick={() => setShowCreate(false)}>Cancel</button>
             <button className="action-btn primary" onClick={createEvent} disabled={creating}>

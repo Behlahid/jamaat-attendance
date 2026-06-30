@@ -66,6 +66,24 @@ export async function POST(request) {
       );
     }
 
+    // Fetch event to check times
+    const { data: event, error: eventError } = await supabase
+      .from('events')
+      .select('end_time, late_time')
+      .eq('id', eventId)
+      .single();
+
+    if (eventError || !event) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+    }
+
+    const now = new Date();
+    if (event.end_time && now > new Date(event.end_time)) {
+      return NextResponse.json({ error: 'Event has ended' }, { status: 403 });
+    }
+
+    const attendanceStatus = (event.late_time && now > new Date(event.late_time)) ? 'late' : 'present';
+
     // Check if already marked
     const { data: existing } = await supabase
       .from('attendance')
@@ -91,6 +109,7 @@ export async function POST(request) {
         member_name: member.name,
         scanned_by: profile.id,
         method,
+        status: attendanceStatus,
       })
       .select()
       .single();
