@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 // GET /api/events — List events
 export async function GET(request) {
-  const { error } = await requireAuth(request);
+  const { profile, error } = await requireAuth(request);
   if (error) {
     return NextResponse.json({ error }, { status: 401 });
   }
@@ -27,9 +27,24 @@ export async function GET(request) {
       return NextResponse.json({ error: fetchError.message }, { status: 500 });
     }
 
+    // Filter by authorized scanners if not admin
+    let authorizedEvents = data;
+    if (profile.role !== 'admin') {
+      // Try to fetch assignments (fails gracefully if table missing)
+      const { data: assigned, error: assignErr } = await supabase
+        .from('event_scanners')
+        .select('event_id')
+        .eq('scanner_id', profile.id);
+        
+      if (!assignErr && assigned) {
+        const assignedIds = new Set(assigned.map(a => a.event_id));
+        authorizedEvents = data.filter(ev => assignedIds.has(ev.id));
+      }
+    }
+
     // Get attendance counts for each event
     const eventsWithCounts = await Promise.all(
-      data.map(async (event) => {
+      authorizedEvents.map(async (event) => {
         const { count } = await supabase
           .from('attendance')
           .select('*', { count: 'exact', head: true })

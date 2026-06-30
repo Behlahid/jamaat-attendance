@@ -66,10 +66,10 @@ export async function POST(request) {
       );
     }
 
-    // Fetch event to check times
+    // Fetch event to check times and restrictions
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .select('end_time, late_time')
+      .select('end_time, late_time, is_restricted')
       .eq('id', eventId)
       .single();
 
@@ -83,6 +83,20 @@ export async function POST(request) {
     }
 
     const attendanceStatus = (event.late_time && now > new Date(event.late_time)) ? 'late' : 'present';
+
+    // Check restriction
+    if (event.is_restricted) {
+      const { data: invite } = await supabase
+        .from('event_members')
+        .select('member_id')
+        .eq('event_id', eventId)
+        .eq('member_id', member.id)
+        .single();
+      
+      if (!invite) {
+        return NextResponse.json({ error: 'Not on the invite list for this event' }, { status: 403 });
+      }
+    }
 
     // Check if already marked
     const { data: existing } = await supabase

@@ -19,6 +19,92 @@ export default function EventsPage() {
   const [creating, setCreating] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
+  const [showScannerModal, setShowScannerModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [allScanners, setAllScanners] = useState([]);
+  const [assignedScannerIds, setAssignedScannerIds] = useState([]);
+  
+  const [isRestricted, setIsRestricted] = useState(false);
+  const [inviteText, setInviteText] = useState('');
+  const [inviteCount, setInviteCount] = useState(0);
+
+  // Scanners Logic
+  const openScannerModal = async (event) => {
+    setSelectedEvent(event);
+    setShowScannerModal(true);
+    
+    // Fetch all scanners
+    const res1 = await apiFetch('/api/account/register-scanner');
+    const data1 = await res1.json();
+    setAllScanners(data1.scanners || []);
+
+    // Fetch assigned scanners
+    const res2 = await apiFetch(`/api/events/${event.id}/scanners`);
+    const data2 = await res2.json();
+    setAssignedScannerIds(data2.scannerIds || []);
+  };
+
+  const saveScanners = async () => {
+    try {
+      await apiFetch(`/api/events/${selectedEvent.id}/scanners`, {
+        method: 'POST',
+        body: JSON.stringify({ scannerIds: assignedScannerIds })
+      });
+      showToast('✅ Scanners updated', 'success');
+      setShowScannerModal(false);
+    } catch {
+      showToast('❌ Failed to update scanners', 'error');
+    }
+  };
+
+  const toggleScanner = (id) => {
+    setAssignedScannerIds(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  // Invites Logic
+  const openInviteModal = async (event) => {
+    setSelectedEvent(event);
+    setShowInviteModal(true);
+    setInviteText('');
+    
+    const res = await apiFetch(`/api/events/${event.id}/invites`);
+    const data = await res.json();
+    setIsRestricted(!!data.is_restricted);
+    setInviteCount(data.count || 0);
+  };
+
+  const saveRestrictedStatus = async (status) => {
+    setIsRestricted(status);
+    await apiFetch(`/api/events/${selectedEvent.id}/invites`, {
+      method: 'POST',
+      body: JSON.stringify({ is_restricted: status })
+    });
+  };
+
+  const saveInvites = async () => {
+    const ids = inviteText.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+    if (ids.length === 0) return;
+
+    try {
+      const res = await apiFetch(`/api/events/${selectedEvent.id}/invites`, {
+        method: 'POST',
+        body: JSON.stringify({ its_ids: ids })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`✅ Matched ${data.matched} members`, 'success');
+        setInviteText('');
+        openInviteModal(selectedEvent); // refresh count
+      } else {
+        showToast(`❌ ${data.error}`, 'error');
+      }
+    } catch {
+      showToast('❌ Failed to update invites', 'error');
+    }
+  };
+
   const loadEvents = useCallback(async () => {
     const res = await apiFetch('/api/events');
     const data = await res.json();
@@ -209,15 +295,21 @@ export default function EventsPage() {
               </div>
             </div>
 
-            <div className="session-actions">
+            <div className="session-actions" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               <button
                 className={`session-btn ${ev.is_active ? '' : 'primary'}`}
                 onClick={() => toggleActive(ev)}
               >
-                {ev.is_active ? '⏸️ Deactivate' : '▶️ Activate'}
+                {ev.is_active ? '⏸️' : '▶️'}
+              </button>
+              <button className="session-btn" onClick={() => openScannerModal(ev)}>
+                👤 Scanners
+              </button>
+              <button className="session-btn" onClick={() => openInviteModal(ev)}>
+                📜 Invites
               </button>
               <button className="session-btn primary" onClick={() => exportEvent(ev)}>
-                ⬇️ Export
+                ⬇️
               </button>
               <button className="session-btn danger" onClick={() => deleteEvent(ev)}>
                 🗑️
@@ -226,6 +318,59 @@ export default function EventsPage() {
           </div>
         ))
       )}
+
+      {/* Scanner Assignment Modal */}
+      <Modal isOpen={showScannerModal} onClose={() => setShowScannerModal(false)} title="Assign Scanners">
+        <p className="text-sm text-muted mb-3">Check the boxes to authorize scanners. If none are checked, no scanner can view or scan for this event.</p>
+        <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '16px', background: 'var(--bg-secondary)', padding: '10px', borderRadius: '8px' }}>
+          {allScanners.length === 0 && <div className="text-sm text-muted">No scanners exist.</div>}
+          {allScanners.map(s => (
+            <label key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}>
+              <input 
+                type="checkbox" 
+                checked={assignedScannerIds.includes(s.id)}
+                onChange={() => toggleScanner(s.id)}
+                style={{ width: '20px', height: '20px' }}
+              />
+              <span style={{ fontSize: '15px', color: 'var(--text)' }}>📱 {s.display_name}</span>
+            </label>
+          ))}
+        </div>
+        <button className="action-btn primary" onClick={saveScanners} style={{ width: '100%' }}>✅ Save Assignments</button>
+      </Modal>
+
+      {/* Invites Modal */}
+      <Modal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} title="Manage Invites">
+        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', cursor: 'pointer', marginBottom: '16px' }}>
+          <input 
+            type="checkbox" 
+            checked={isRestricted}
+            onChange={(e) => saveRestrictedStatus(e.target.checked)}
+            style={{ width: '20px', height: '20px' }}
+          />
+          <div>
+            <div style={{ fontSize: '15px', fontWeight: 'bold' }}>Restricted Event</div>
+            <div className="text-xs text-muted">If checked, only invited members can scan successfully.</div>
+          </div>
+        </label>
+
+        {isRestricted && (
+          <>
+            <div style={{ marginBottom: '16px', padding: '12px', background: 'var(--green-light)', color: 'var(--green)', borderRadius: '8px', fontWeight: 'bold' }}>
+              📜 Currently Invited: {inviteCount} members
+            </div>
+            <p className="text-sm mb-2" style={{ color: 'var(--text)' }}>Paste ITS IDs (separated by commas or new lines) to invite members. This will OVERWRITE the current list.</p>
+            <textarea 
+              className="id-input"
+              value={inviteText}
+              onChange={e => setInviteText(e.target.value)}
+              placeholder="e.g. 10293847, 91827364"
+              style={{ width: '100%', height: '120px', marginBottom: '10px', padding: '10px' }}
+            />
+            <button className="action-btn primary" onClick={saveInvites} style={{ width: '100%' }}>📤 Upload & Verify Invites</button>
+          </>
+        )}
+      </Modal>
 
       {ToastComponent}
     </div>
