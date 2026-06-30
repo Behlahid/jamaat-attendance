@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 
 // ── Rate limiter with automatic eviction ──
 const IS_DEV = process.env.NODE_ENV !== 'production';
-const RATE = { max: IS_DEV ? 100 : 5, windowMs: IS_DEV ? 1000 : 15 * 60 * 1000 };
+const RATE = { max: 50, windowMs: 15 * 60 * 1000 };
 const attempts = new Map();
 
 function isRateLimited(ip) {
