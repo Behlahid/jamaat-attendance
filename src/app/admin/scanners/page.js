@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
+import { SkeletonRow } from '@/components/Skeleton';
 import {
   Smartphone,
   Plus,
@@ -145,9 +146,8 @@ export default function ScannersPage() {
 
       {/* Scanner List */}
       {loadingList ? (
-        <div className="empty-state">
-          <Loader2 className="btn-spinner" style={{ margin: '0 auto 8px' }} />
-          <div>Loading…</div>
+        <div className="member-list">
+          {[0, 1, 2].map((i) => <SkeletonRow key={i} />)}
         </div>
       ) : scanners.length === 0 ? (
         <div className="panel">

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
+import { SkeletonRow } from '@/components/Skeleton';
 import {
   Users,
   Search,
@@ -26,7 +27,7 @@ export default function MembersPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
   const [searchTimeout, setSearchTimeout] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // CSV Import state
   const [pendingImport, setPendingImport] = useState(null);
@@ -267,10 +268,7 @@ export default function MembersPage() {
       {/* Member List */}
       <div className="member-list">
         {loading ? (
-          <div className="empty-state">
-            <Loader2 className="btn-spinner" style={{ margin: '0 auto 8px' }} />
-            <div>Loading…</div>
-          </div>
+          [0, 1, 2, 3, 4, 5].map((i) => <SkeletonRow key={i} trailing={false} />)
         ) : members.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon"><Users /></div>

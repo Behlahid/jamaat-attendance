@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
 import Modal from '@/components/Modal';
+import { Skeleton } from '@/components/Skeleton';
 import {
   CalendarDays,
   CalendarX2,
@@ -25,6 +26,7 @@ export default function EventsPage() {
   const { showToast, ToastComponent } = useToast();
 
   const [events, setEvents] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
@@ -121,9 +123,13 @@ export default function EventsPage() {
   };
 
   const loadEvents = useCallback(async () => {
-    const res = await apiFetch('/api/events');
-    const data = await res.json();
-    setEvents(data.events || []);
+    try {
+      const res = await apiFetch('/api/events');
+      const data = await res.json();
+      setEvents(data.events || []);
+    } finally {
+      setLoadingEvents(false);
+    }
   }, [apiFetch]);
 
   useEffect(() => { loadEvents(); }, [loadEvents]);
@@ -282,7 +288,24 @@ export default function EventsPage() {
       )}
 
       {/* Events List */}
-      {events.length === 0 ? (
+      {loadingEvents ? (
+        [0, 1, 2].map((i) => (
+          <div key={i} className="session-card">
+            <div className="session-header">
+              <div style={{ flex: 1 }}>
+                <Skeleton width="50%" height={14} style={{ marginBottom: 8 }} />
+                <Skeleton width="35%" height={10} />
+              </div>
+              <Skeleton width={70} height={20} style={{ borderRadius: 'var(--radius-full)' }} />
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <Skeleton width={38} height={34} style={{ borderRadius: 'var(--radius-sm)' }} />
+              <Skeleton width={90} height={34} style={{ borderRadius: 'var(--radius-sm)' }} />
+              <Skeleton width={80} height={34} style={{ borderRadius: 'var(--radius-sm)' }} />
+            </div>
+          </div>
+        ))
+      ) : events.length === 0 ? (
         <div className="panel">
           <div className="empty-state">
             <div className="empty-icon"><CalendarX2 /></div>

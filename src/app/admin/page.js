@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { Skeleton, SkeletonStats, SkeletonList } from '@/components/Skeleton';
 import {
   CalendarX2,
   Radio,
@@ -19,6 +20,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState({ present: 0, total: 0, absent: 0 });
   const [recentScans, setRecentScans] = useState([]);
   const [events, setEvents] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
 
   // Load events and stats
   const loadData = useCallback(async () => {
@@ -43,6 +45,7 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('Dashboard load error:', err);
     }
+    setLoadingData(false);
   }, [apiFetch]);
 
   useEffect(() => {
@@ -100,6 +103,29 @@ export default function AdminDashboard() {
   };
 
   const percentage = stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0;
+
+  if (loadingData) {
+    return (
+      <div className="page-container">
+        <div className="skeleton-row" style={{ marginBottom: 14 }}>
+          <div className="skeleton-row-text">
+            <Skeleton width={90} height={9} />
+            <Skeleton width="60%" height={14} />
+          </div>
+          <Skeleton width={60} height={12} />
+        </div>
+        <SkeletonStats />
+        <div className="panel">
+          <Skeleton width={160} height={12} style={{ marginBottom: 12 }} />
+          <Skeleton height={10} style={{ borderRadius: 5 }} />
+        </div>
+        <div className="panel">
+          <Skeleton width={140} height={12} style={{ marginBottom: 14 }} />
+          <SkeletonList rows={4} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-container">

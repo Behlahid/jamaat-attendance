@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
 import { playSuccess, playLate, playError } from '@/lib/audio';
+import { Skeleton, SkeletonStats } from '@/components/Skeleton';
 import {
   ScanLine,
   LogOut,
@@ -37,6 +38,7 @@ export default function ScanPage() {
   const [nfcAbort, setNfcAbort] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [gate, setGate] = useState('');
+  const [loadingEvent, setLoadingEvent] = useState(true);
   const [, setClockTick] = useState(0);
 
   // Load saved gate
@@ -94,6 +96,7 @@ export default function ScanPage() {
     } catch (err) {
       console.error('Failed to load event:', err);
     }
+    setLoadingEvent(false);
   }, [apiFetch]);
 
   useEffect(() => {
@@ -268,6 +271,24 @@ export default function ScanPage() {
       </header>
 
       <div className="page-container">
+        {loadingEvent ? (
+          <>
+            <div className="skeleton-row" style={{ marginBottom: 14 }}>
+              <div className="skeleton-row-text">
+                <Skeleton width={90} height={9} />
+                <Skeleton width="60%" height={14} />
+              </div>
+              <Skeleton width={70} height={12} />
+            </div>
+            <SkeletonStats />
+            <div className="panel">
+              <Skeleton width={140} height={12} style={{ marginBottom: 14 }} />
+              <Skeleton height={44} style={{ marginBottom: 10 }} />
+              <Skeleton height={48} />
+            </div>
+          </>
+        ) : (
+        <>
         {/* Active Event */}
         {activeEvent ? (
           <>
@@ -399,6 +420,8 @@ export default function ScanPage() {
               </>
             )}
           </div>
+        )}
+        </>
         )}
 
         {/* Last Scan */}
