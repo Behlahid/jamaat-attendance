@@ -4,6 +4,21 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
 import Modal from '@/components/Modal';
+import {
+  CalendarDays,
+  CalendarX2,
+  Plus,
+  Check,
+  Loader2,
+  Play,
+  Pause,
+  Users,
+  ScrollText,
+  Download,
+  Trash2,
+  Smartphone,
+  Upload,
+} from 'lucide-react';
 
 export default function EventsPage() {
   const { apiFetch } = useAuth();
@@ -23,7 +38,7 @@ export default function EventsPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [allScanners, setAllScanners] = useState([]);
   const [assignedScannerIds, setAssignedScannerIds] = useState([]);
-  
+
   const [isRestricted, setIsRestricted] = useState(false);
   const [inviteText, setInviteText] = useState('');
   const [inviteCount, setInviteCount] = useState(0);
@@ -32,7 +47,7 @@ export default function EventsPage() {
   const openScannerModal = async (event) => {
     setSelectedEvent(event);
     setShowScannerModal(true);
-    
+
     // Fetch all scanners
     const res1 = await apiFetch('/api/account/register-scanner');
     const data1 = await res1.json();
@@ -50,15 +65,15 @@ export default function EventsPage() {
         method: 'POST',
         body: JSON.stringify({ scannerIds: assignedScannerIds })
       });
-      showToast('✅ Scanners updated', 'success');
+      showToast('Scanners updated', 'success');
       setShowScannerModal(false);
     } catch {
-      showToast('❌ Failed to update scanners', 'error');
+      showToast('Failed to update scanners', 'error');
     }
   };
 
   const toggleScanner = (id) => {
-    setAssignedScannerIds(prev => 
+    setAssignedScannerIds(prev =>
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
   };
@@ -68,7 +83,7 @@ export default function EventsPage() {
     setSelectedEvent(event);
     setShowInviteModal(true);
     setInviteText('');
-    
+
     const res = await apiFetch(`/api/events/${event.id}/invites`);
     const data = await res.json();
     setIsRestricted(!!data.is_restricted);
@@ -94,14 +109,14 @@ export default function EventsPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        showToast(`✅ Matched ${data.matched} members`, 'success');
+        showToast(`Matched ${data.matched} members`, 'success');
         setInviteText('');
         openInviteModal(selectedEvent); // refresh count
       } else {
-        showToast(`❌ ${data.error}`, 'error');
+        showToast(data.error, 'error');
       }
     } catch {
-      showToast('❌ Failed to update invites', 'error');
+      showToast('Failed to update invites', 'error');
     }
   };
 
@@ -115,7 +130,7 @@ export default function EventsPage() {
 
   const createEvent = async () => {
     if (!newName.trim()) {
-      showToast('❌ Event name is required', 'error');
+      showToast('Event name is required', 'error');
       return;
     }
     setCreating(true);
@@ -124,8 +139,8 @@ export default function EventsPage() {
       const toISO = (timeStr) => timeStr ? new Date(`${newDate}T${timeStr}:00`).toISOString() : null;
       const res = await apiFetch('/api/events', {
         method: 'POST',
-        body: JSON.stringify({ 
-          name: newName, 
+        body: JSON.stringify({
+          name: newName,
           eventDate: newDate,
           startTime: toISO(startTime),
           lateTime: toISO(lateTime),
@@ -133,7 +148,7 @@ export default function EventsPage() {
         }),
       });
       if (res.ok) {
-        showToast('✅ Event created!', 'success');
+        showToast('Event created!', 'success');
         setShowCreate(false);
         setNewName('');
         setStartTime('19:00');
@@ -142,10 +157,10 @@ export default function EventsPage() {
         loadEvents();
       } else {
         const data = await res.json();
-        showToast(`❌ ${data.error}`, 'error');
+        showToast(data.error, 'error');
       }
     } catch {
-      showToast('❌ Failed to create event', 'error');
+      showToast('Failed to create event', 'error');
     }
     setCreating(false);
   };
@@ -157,11 +172,11 @@ export default function EventsPage() {
         body: JSON.stringify({ is_active: !event.is_active }),
       });
       if (res.ok) {
-        showToast(event.is_active ? '⏸️ Event deactivated' : '▶️ Event activated!', 'success');
+        showToast(event.is_active ? 'Event deactivated' : 'Event activated!', 'success');
         loadEvents();
       }
     } catch {
-      showToast('❌ Failed to update', 'error');
+      showToast('Failed to update', 'error');
     }
   };
 
@@ -170,11 +185,11 @@ export default function EventsPage() {
     try {
       const res = await apiFetch(`/api/events/${event.id}`, { method: 'DELETE' });
       if (res.ok) {
-        showToast('🗑️ Event deleted', 'success');
+        showToast('Event deleted', 'success');
         loadEvents();
       }
     } catch {
-      showToast('❌ Failed to delete', 'error');
+      showToast('Failed to delete', 'error');
     }
   };
 
@@ -190,18 +205,18 @@ export default function EventsPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToast('⬇️ CSV downloaded!', 'success');
+      showToast('CSV downloaded!', 'success');
     } catch {
-      showToast('❌ Export failed', 'error');
+      showToast('Export failed', 'error');
     }
   };
 
   return (
     <div className="page-container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 900 }}>📅 Events</h2>
+      <div className="page-header">
+        <div className="page-header-title"><CalendarDays /> Events</div>
         <button className="new-event-btn" onClick={() => setShowCreate(true)}>
-          + New Event
+          <Plus /> New Event
         </button>
       </div>
 
@@ -260,7 +275,7 @@ export default function EventsPage() {
           <div className="action-row">
             <button className="action-btn secondary" onClick={() => setShowCreate(false)}>Cancel</button>
             <button className="action-btn primary" onClick={createEvent} disabled={creating}>
-              {creating ? '...' : '✅ Create Event'}
+              {creating ? <Loader2 className="btn-spinner" /> : <Check />} Create Event
             </button>
           </div>
         </div>
@@ -270,7 +285,7 @@ export default function EventsPage() {
       {events.length === 0 ? (
         <div className="panel">
           <div className="empty-state">
-            <div className="empty-icon">📅</div>
+            <div className="empty-icon"><CalendarX2 /></div>
             <div>No events yet</div>
             <div className="text-xs text-muted mt-2">Create your first event above</div>
           </div>
@@ -281,7 +296,7 @@ export default function EventsPage() {
             <div className="session-header">
               <div>
                 <div className="session-date">
-                  {ev.is_active && <span style={{ color: 'var(--green)' }}>🟢 </span>}
+                  {ev.is_active && <span className="live-badge" style={{ marginRight: 6 }}><span className="live-dot" /></span>}
                   {ev.name}
                 </div>
                 <div className="text-xs text-muted" style={{ marginTop: 2 }}>
@@ -297,22 +312,23 @@ export default function EventsPage() {
 
             <div className="session-actions" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               <button
-                className={`session-btn ${ev.is_active ? '' : 'primary'}`}
+                className={`session-btn icon-only ${ev.is_active ? '' : 'primary'}`}
                 onClick={() => toggleActive(ev)}
+                aria-label={ev.is_active ? 'Pause event' : 'Activate event'}
               >
-                {ev.is_active ? '⏸️' : '▶️'}
+                {ev.is_active ? <Pause /> : <Play />}
               </button>
               <button className="session-btn" onClick={() => openScannerModal(ev)}>
-                👤 Scanners
+                <Users /> Scanners
               </button>
               <button className="session-btn" onClick={() => openInviteModal(ev)}>
-                📜 Invites
+                <ScrollText /> Invites
               </button>
-              <button className="session-btn primary" onClick={() => exportEvent(ev)}>
-                ⬇️
+              <button className="session-btn icon-only primary" onClick={() => exportEvent(ev)} aria-label="Export CSV">
+                <Download />
               </button>
-              <button className="session-btn danger" onClick={() => deleteEvent(ev)}>
-                🗑️
+              <button className="session-btn icon-only danger" onClick={() => deleteEvent(ev)} aria-label="Delete event">
+                <Trash2 />
               </button>
             </div>
           </div>
@@ -326,24 +342,28 @@ export default function EventsPage() {
           {allScanners.length === 0 && <div className="text-sm text-muted">No scanners exist.</div>}
           {allScanners.map(s => (
             <label key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}>
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 checked={assignedScannerIds.includes(s.id)}
                 onChange={() => toggleScanner(s.id)}
                 style={{ width: '20px', height: '20px' }}
               />
-              <span style={{ fontSize: '15px', color: 'var(--text)' }}>📱 {s.display_name}</span>
+              <span style={{ fontSize: '15px', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Smartphone size={15} /> {s.display_name}
+              </span>
             </label>
           ))}
         </div>
-        <button className="action-btn primary" onClick={saveScanners} style={{ width: '100%' }}>✅ Save Assignments</button>
+        <button className="action-btn primary" onClick={saveScanners} style={{ width: '100%' }}>
+          <Check /> Save Assignments
+        </button>
       </Modal>
 
       {/* Invites Modal */}
       <Modal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} title="Manage Invites">
         <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', cursor: 'pointer', marginBottom: '16px' }}>
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             checked={isRestricted}
             onChange={(e) => saveRestrictedStatus(e.target.checked)}
             style={{ width: '20px', height: '20px' }}
@@ -356,18 +376,20 @@ export default function EventsPage() {
 
         {isRestricted && (
           <>
-            <div style={{ marginBottom: '16px', padding: '12px', background: 'var(--green-light)', color: 'var(--green)', borderRadius: '8px', fontWeight: 'bold' }}>
-              📜 Currently Invited: {inviteCount} members
+            <div style={{ marginBottom: '16px', padding: '12px', background: 'var(--green-light)', color: 'var(--green)', borderRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ScrollText size={16} /> Currently Invited: {inviteCount} members
             </div>
             <p className="text-sm mb-2" style={{ color: 'var(--text)' }}>Paste ITS IDs (separated by commas or new lines) to invite members. This will OVERWRITE the current list.</p>
-            <textarea 
+            <textarea
               className="id-input"
               value={inviteText}
               onChange={e => setInviteText(e.target.value)}
               placeholder="e.g. 10293847, 91827364"
               style={{ width: '100%', height: '120px', marginBottom: '10px', padding: '10px' }}
             />
-            <button className="action-btn primary" onClick={saveInvites} style={{ width: '100%' }}>📤 Upload & Verify Invites</button>
+            <button className="action-btn primary" onClick={saveInvites} style={{ width: '100%' }}>
+              <Upload /> Upload &amp; Verify Invites
+            </button>
           </>
         )}
       </Modal>

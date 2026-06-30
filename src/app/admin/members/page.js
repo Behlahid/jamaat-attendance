@@ -3,6 +3,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
+import {
+  Users,
+  Search,
+  FolderUp,
+  FileText,
+  Download,
+  Loader2,
+  User,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 
 export default function MembersPage() {
   const { apiFetch } = useAuth();
@@ -58,7 +69,7 @@ export default function MembersPage() {
       const text = e.target.result;
       const lines = text.split(/\r?\n/).filter((l) => l.trim());
       if (lines.length < 2) {
-        showToast('❌ CSV seems empty', 'error');
+        showToast('CSV seems empty', 'error');
         return;
       }
 
@@ -82,7 +93,7 @@ export default function MembersPage() {
       };
 
       if (colMap.id === -1) {
-        showToast('❌ Could not find ITS_ID column', 'error');
+        showToast('Could not find ITS_ID column', 'error');
         return;
       }
 
@@ -112,7 +123,7 @@ export default function MembersPage() {
       }
 
       if (!parsed.length) {
-        showToast('❌ No valid rows found', 'error');
+        showToast('No valid rows found', 'error');
         return;
       }
 
@@ -131,14 +142,14 @@ export default function MembersPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        showToast(`✅ ${data.imported} members imported (${data.total} total)`, 'success');
+        showToast(`${data.imported} members imported (${data.total} total)`, 'success');
         setPendingImport(null);
         loadMembers(1, '');
       } else {
-        showToast(`❌ ${data.error}`, 'error');
+        showToast(data.error, 'error');
       }
     } catch {
-      showToast('❌ Import failed', 'error');
+      showToast('Import failed', 'error');
     }
     setImporting(false);
   };
@@ -158,11 +169,13 @@ export default function MembersPage() {
 
   return (
     <div className="page-container">
-      <h2 style={{ fontSize: 16, fontWeight: 900, marginBottom: 14 }}>👥 Members ({total})</h2>
+      <div className="page-header-title" style={{ marginBottom: 14 }}>
+        <Users /> Members ({total})
+      </div>
 
       {/* Search */}
       <div className="search-wrapper" style={{ marginBottom: 10 }}>
-        <span className="search-icon">🔍</span>
+        <span className="search-icon"><Search /></span>
         <input
           className="search-bar"
           placeholder="Search name or ITS ID…"
@@ -173,7 +186,7 @@ export default function MembersPage() {
 
       {/* Import CSV Panel */}
       <div className="panel" style={{ marginBottom: 14 }}>
-        <div className="panel-title">📂 Import Members CSV</div>
+        <div className="panel-title"><FolderUp /> Import Members CSV</div>
         <div
           className="upload-zone"
           onClick={() => fileRef.current?.click()}
@@ -185,7 +198,7 @@ export default function MembersPage() {
             handleCSV(e.dataTransfer.files[0]);
           }}
         >
-          <div className="upload-icon">📄</div>
+          <div className="upload-icon"><FileText /></div>
           <div className="upload-title">Tap to choose CSV file</div>
           <div className="upload-sub">or drag and drop here</div>
         </div>
@@ -237,33 +250,36 @@ export default function MembersPage() {
                 Cancel
               </button>
               <button className="action-btn primary" onClick={() => applyImport('replace')} disabled={importing}>
-                {importing ? '...' : 'Replace All'}
+                {importing ? <Loader2 className="btn-spinner" /> : 'Replace All'}
               </button>
               <button className="action-btn accent" onClick={() => applyImport('merge')} disabled={importing}>
-                {importing ? '...' : 'Merge / Add'}
+                {importing ? <Loader2 className="btn-spinner" /> : 'Merge / Add'}
               </button>
             </div>
           </div>
         )}
 
         <button className="action-btn secondary" onClick={downloadTemplate} style={{ marginTop: 10, width: '100%' }}>
-          ⬇️ Download CSV Template
+          <Download /> Download CSV Template
         </button>
       </div>
 
       {/* Member List */}
       <div className="member-list">
         {loading ? (
-          <div className="empty-state">Loading…</div>
+          <div className="empty-state">
+            <Loader2 className="btn-spinner" style={{ margin: '0 auto 8px' }} />
+            <div>Loading…</div>
+          </div>
         ) : members.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">👥</div>
+            <div className="empty-icon"><Users /></div>
             <div>No members found</div>
           </div>
         ) : (
           members.map((m) => (
             <div key={m.id} className="member-card absent">
-              <div className="status-dot">👤</div>
+              <div className="status-dot"><User /></div>
               <div className="member-info">
                 <div className="member-name">{m.name}</div>
                 <div className="member-meta">
@@ -291,7 +307,7 @@ export default function MembersPage() {
             disabled={page <= 1}
             onClick={() => loadMembers(page - 1, search)}
           >
-            ← Prev
+            <ChevronLeft /> Prev
           </button>
           <span className="text-sm font-bold text-muted">
             Page {page} of {totalPages}
@@ -301,7 +317,7 @@ export default function MembersPage() {
             disabled={page >= totalPages}
             onClick={() => loadMembers(page + 1, search)}
           >
-            Next →
+            Next <ChevronRight />
           </button>
         </div>
       )}

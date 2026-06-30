@@ -3,6 +3,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabase';
+import {
+  CalendarX2,
+  Radio,
+  CheckCircle2,
+  Nfc,
+  Keyboard,
+  Download,
+  History,
+} from 'lucide-react';
 
 export default function AdminDashboard() {
   const { apiFetch } = useAuth();
@@ -98,7 +107,9 @@ export default function AdminDashboard() {
       {activeEvent ? (
         <div className="event-bar">
           <div>
-            <div className="event-label">🟢 LIVE EVENT</div>
+            <div className="event-label">
+              <span className="live-badge"><span className="live-dot" />LIVE EVENT</span>
+            </div>
             <div className="event-name">{activeEvent.name}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
@@ -110,9 +121,9 @@ export default function AdminDashboard() {
           </div>
         </div>
       ) : (
-        <div className="panel" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 36, marginBottom: 8 }}>📅</div>
-          <div style={{ fontWeight: 700, marginBottom: 4 }}>No Active Event</div>
+        <div className="panel empty-state">
+          <div className="empty-icon"><CalendarX2 /></div>
+          <div style={{ color: 'var(--text)', fontWeight: 700 }}>No Active Event</div>
           <div className="text-muted text-sm">
             Go to Events tab to create and activate one.
           </div>
@@ -162,10 +173,10 @@ export default function AdminDashboard() {
       {/* Live Scan Feed */}
       {activeEvent && (
         <div className="panel">
-          <div className="panel-title">📡 Live Scan Feed</div>
+          <div className="panel-title"><Radio /> Live Scan Feed</div>
           {recentScans.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">📡</div>
+              <div className="empty-icon"><Radio /></div>
               <div>Waiting for scans…</div>
               <div className="text-xs text-muted mt-2">
                 Scans will appear here in real-time
@@ -177,11 +188,13 @@ export default function AdminDashboard() {
                 <div key={scan.id || i} className="member-card present" style={{
                   animation: i === 0 ? 'justMarked 0.6s ease' : 'none',
                 }}>
-                  <div className="status-dot">✅</div>
+                  <div className="status-dot"><CheckCircle2 /></div>
                   <div className="member-info">
                     <div className="member-name">{scan.member_name}</div>
                     <div className="member-meta">
-                      ITS: {scan.its_id} · {scan.method === 'nfc' ? '📡 NFC' : '⌨️ Manual'}
+                      ITS: {scan.its_id} ·{' '}
+                      <span className="meta-icon">{scan.method === 'nfc' ? <Nfc /> : <Keyboard />}</span>
+                      {scan.method === 'nfc' ? 'NFC' : 'Manual'}
                       {scan.profiles?.display_name && ` · by ${scan.profiles.display_name}`}
                     </div>
                   </div>
@@ -201,7 +214,7 @@ export default function AdminDashboard() {
       {activeEvent && stats.present > 0 && (
         <div className="export-row">
           <button className="export-btn gold" onClick={exportCSV}>
-            ⬇️ Export Attendance CSV
+            <Download /> Export Attendance CSV
           </button>
         </div>
       )}
@@ -209,7 +222,7 @@ export default function AdminDashboard() {
       {/* Past Events Summary */}
       {events.filter((e) => !e.is_active).length > 0 && (
         <div className="panel" style={{ marginTop: 14 }}>
-          <div className="panel-title">📋 Recent Events</div>
+          <div className="panel-title"><History /> Recent Events</div>
           {events.filter((e) => !e.is_active).slice(0, 5).map((ev) => (
             <div key={ev.id} style={{
               display: 'flex',

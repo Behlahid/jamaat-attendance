@@ -3,6 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
+import {
+  Smartphone,
+  Plus,
+  Check,
+  Loader2,
+  Trash2,
+  Info,
+} from 'lucide-react';
 
 export default function ScannersPage() {
   const { apiFetch } = useAuth();
@@ -32,11 +40,11 @@ export default function ScannersPage() {
 
   const createScanner = async () => {
     if (!email || !password || !displayName) {
-      showToast('❌ All fields are required', 'error');
+      showToast('All fields are required', 'error');
       return;
     }
     if (password.length < 6) {
-      showToast('❌ Password must be at least 6 characters', 'error');
+      showToast('Password must be at least 6 characters', 'error');
       return;
     }
 
@@ -49,17 +57,17 @@ export default function ScannersPage() {
       const data = await res.json();
 
       if (res.ok) {
-        showToast(`✅ Scanner "${displayName}" created!`, 'success');
+        showToast(`Scanner "${displayName}" created!`, 'success');
         setShowCreate(false);
         setEmail('');
         setPassword('');
         setDisplayName('');
         loadScanners();
       } else {
-        showToast(`❌ ${data.error}`, 'error');
+        showToast(data.error, 'error');
       }
     } catch {
-      showToast('❌ Failed to create scanner', 'error');
+      showToast('Failed to create scanner', 'error');
     }
     setCreating(false);
   };
@@ -74,23 +82,23 @@ export default function ScannersPage() {
         method: 'DELETE',
       });
       if (res.ok) {
-        showToast('🗑️ Scanner deleted', 'success');
+        showToast('Scanner deleted', 'success');
         loadScanners();
       } else {
         const data = await res.json();
-        showToast(`❌ ${data.error}`, 'error');
+        showToast(data.error, 'error');
       }
     } catch {
-      showToast('❌ Failed to delete', 'error');
+      showToast('Failed to delete', 'error');
     }
   };
 
   return (
     <div className="page-container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 900 }}>📱 Scanners</h2>
+      <div className="page-header">
+        <div className="page-header-title"><Smartphone /> Scanners</div>
         <button className="new-event-btn" onClick={() => setShowCreate(true)}>
-          + Add Scanner
+          <Plus /> Add Scanner
         </button>
       </div>
 
@@ -129,7 +137,7 @@ export default function ScannersPage() {
           <div className="action-row">
             <button className="action-btn secondary" onClick={() => setShowCreate(false)}>Cancel</button>
             <button className="action-btn primary" onClick={createScanner} disabled={creating}>
-              {creating ? '...' : '✅ Create Scanner'}
+              {creating ? <Loader2 className="btn-spinner" /> : <Check />} Create Scanner
             </button>
           </div>
         </div>
@@ -137,11 +145,14 @@ export default function ScannersPage() {
 
       {/* Scanner List */}
       {loadingList ? (
-        <div className="empty-state">Loading…</div>
+        <div className="empty-state">
+          <Loader2 className="btn-spinner" style={{ margin: '0 auto 8px' }} />
+          <div>Loading…</div>
+        </div>
       ) : scanners.length === 0 ? (
         <div className="panel">
           <div className="empty-state">
-            <div className="empty-icon">📱</div>
+            <div className="empty-icon"><Smartphone /></div>
             <div>No scanners yet</div>
             <div className="text-xs text-muted mt-2">
               Create scanner accounts for your helpers
@@ -154,8 +165,8 @@ export default function ScannersPage() {
             <div key={s.id} className="session-card" style={{ marginBottom: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 800 }}>
-                    📱 {s.display_name}
+                  <div style={{ fontSize: 14, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <Smartphone size={15} /> {s.display_name}
                   </div>
                   <div className="text-xs text-muted" style={{ marginTop: 2 }}>
                     {s.email}
@@ -171,7 +182,7 @@ export default function ScannersPage() {
                   onClick={() => deleteScanner(s)}
                   style={{ flexShrink: 0 }}
                 >
-                  🗑️ Delete
+                  <Trash2 /> Delete
                 </button>
               </div>
             </div>
@@ -182,8 +193,8 @@ export default function ScannersPage() {
       {/* Credentials Info */}
       {scanners.length > 0 && (
         <div className="panel" style={{ marginTop: 14, background: 'var(--blue-light)', border: '1px solid rgba(26,95,168,0.2)' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--blue)', marginBottom: 4 }}>
-            ℹ️ How to use
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--blue)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Info size={14} /> How to use
           </div>
           <div className="text-sm text-muted">
             Share the email and password with your scanner helpers. They go to the same URL, log in, and they&apos;ll only see the scanning interface.

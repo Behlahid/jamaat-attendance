@@ -3,6 +3,16 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
+import {
+  Crown,
+  LogOut,
+  LayoutDashboard,
+  CalendarDays,
+  Users,
+  Smartphone,
+  Settings,
+  Loader2,
+} from 'lucide-react';
 
 export default function AdminLayout({ children }) {
   const { user, profile, loading, signOut, isAdmin } = useAuth();
@@ -28,17 +38,9 @@ export default function AdminLayout({ children }) {
 
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        background: 'var(--bg)',
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 40, marginBottom: 12, animation: 'lockBounce 2s ease infinite' }}>🕌</div>
-          <div style={{ color: 'var(--muted)', fontSize: 14, fontWeight: 600 }}>Loading…</div>
-        </div>
+      <div className="admin-loading">
+        <Loader2 />
+        <div className="admin-loading-title">Loading…</div>
       </div>
     );
   }
@@ -47,7 +49,7 @@ export default function AdminLayout({ children }) {
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       {/* Header */}
       <header className="app-header">
-        <div className="hdr-icon">👑</div>
+        <div className="hdr-icon"><Crown /></div>
         <div className="hdr-info">
           <h1>Jamaat Attendance</h1>
           <p>Admin · {profile?.display_name}</p>
@@ -59,7 +61,7 @@ export default function AdminLayout({ children }) {
             })}
           </div>
           <button className="lock-btn" onClick={signOut}>
-            🚪 Logout
+            <LogOut /> Logout
           </button>
         </div>
       </header>
@@ -68,23 +70,16 @@ export default function AdminLayout({ children }) {
       <div style={{ paddingBottom: '80px' }}>
         {children}
 
-        <div style={{ textAlign: 'center', marginTop: '30px' }}>
-          <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', color: 'gray', fontWeight: 700, marginBottom: '2px' }}>
-            Engineered By
-          </div>
-          <div style={{ fontSize: '15px', fontWeight: 900, background: 'linear-gradient(135deg, #0070f3, #7928ca)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '0.5px' }}>
-            BEHLAH
-          </div>
-        </div>
+        <div className="page-credit">BEHLAH</div>
       </div>
 
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
-        <NavItem href="/admin" icon="📊" label="Dashboard" />
-        <NavItem href="/admin/events" icon="📅" label="Events" />
-        <NavItem href="/admin/members" icon="👥" label="Members" />
-        <NavItem href="/admin/scanners" icon="📱" label="Scanners" />
-        <NavItem href="/admin/settings" icon="⚙️" label="Settings" />
+        <NavItem href="/admin" icon={<LayoutDashboard />} label="Dashboard" />
+        <NavItem href="/admin/events" icon={<CalendarDays />} label="Events" />
+        <NavItem href="/admin/members" icon={<Users />} label="Members" />
+        <NavItem href="/admin/scanners" icon={<Smartphone />} label="Scanners" />
+        <NavItem href="/admin/settings" icon={<Settings />} label="Settings" />
       </nav>
     </div>
   );

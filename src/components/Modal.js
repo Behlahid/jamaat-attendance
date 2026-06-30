@@ -1,5 +1,7 @@
 'use client';
 
+import { X } from 'lucide-react';
+
 export default function Modal({ isOpen, onClose, title, children }) {
   if (!isOpen) return null;
 
@@ -8,7 +10,7 @@ export default function Modal({ isOpen, onClose, title, children }) {
       if (e.target === e.currentTarget) onClose();
     }}>
       <div className="modal">
-        <button className="modal-close" onClick={onClose}>✕</button>
+        <button className="modal-close" onClick={onClose} aria-label="Close"><X /></button>
         {title && <div className="modal-title">{title}</div>}
         {children}
       </div>

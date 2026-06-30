@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
+import {
+  Settings,
+  User,
+  Crown,
+  Palette,
+  Moon,
+  Info,
+  LogOut,
+} from 'lucide-react';
 
 export default function SettingsPage() {
   const { profile, signOut } = useAuth();
@@ -23,16 +32,18 @@ export default function SettingsPage() {
     setDarkMode(next);
     document.documentElement.setAttribute('data-theme', next ? 'dark' : 'light');
     localStorage.setItem('darkMode', next);
-    showToast(next ? '🌙 Dark mode on' : '☀️ Light mode on', 'success');
+    showToast(next ? 'Dark mode on' : 'Light mode on', 'success');
   };
 
   return (
     <div className="page-container">
-      <h2 style={{ fontSize: 16, fontWeight: 900, marginBottom: 14 }}>⚙️ Settings</h2>
+      <div className="page-header-title" style={{ marginBottom: 14 }}>
+        <Settings /> Settings
+      </div>
 
       {/* Profile */}
       <div className="panel">
-        <div className="panel-title">👤 Admin Profile</div>
+        <div className="panel-title"><User /> Admin Profile</div>
         <div className="setting-row">
           <div>
             <div className="setting-label">Name</div>
@@ -48,16 +59,18 @@ export default function SettingsPage() {
         <div className="setting-row">
           <div>
             <div className="setting-label">Role</div>
-            <div className="text-sm text-muted">👑 Administrator</div>
+            <div className="text-sm text-muted" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <Crown size={13} /> Administrator
+            </div>
           </div>
         </div>
       </div>
 
       {/* Appearance */}
       <div className="panel">
-        <div className="panel-title">🎨 Appearance</div>
+        <div className="panel-title"><Palette /> Appearance</div>
         <div className="setting-row">
-          <div className="setting-label">🌙 Dark Mode</div>
+          <div className="setting-label"><Moon /> Dark Mode</div>
           <button
             className={`toggle ${darkMode ? 'on' : ''}`}
             onClick={toggleDarkMode}
@@ -67,7 +80,7 @@ export default function SettingsPage() {
 
       {/* About */}
       <div className="panel">
-        <div className="panel-title">ℹ️ About</div>
+        <div className="panel-title"><Info /> About</div>
         <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
           <div className="setting-label">Jamaat Attendance System</div>
           <div className="text-xs text-muted">
@@ -91,7 +104,7 @@ export default function SettingsPage() {
           borderColor: 'var(--red)',
         }}
       >
-        🚪 Sign Out
+        <LogOut /> Sign Out
       </button>
 
       {ToastComponent}
