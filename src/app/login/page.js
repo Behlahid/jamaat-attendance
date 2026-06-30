@@ -169,6 +169,15 @@ export default function LoginPage() {
           This is a one-time setup. You&apos;ll create scanner accounts later.
         </div>
       )}
+
+      <div style={{ textAlign: 'center', marginTop: '40px', paddingBottom: '20px' }}>
+        <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', color: 'rgba(255,255,255,0.6)', fontWeight: 700, marginBottom: '2px' }}>
+          Engineered By
+        </div>
+        <div style={{ fontSize: '15px', fontWeight: 900, background: 'linear-gradient(135deg, #00C9FF, #92FE9D)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '0.5px' }}>
+          BEHLAH
+        </div>
+      </div>
     </div>
   );
 }

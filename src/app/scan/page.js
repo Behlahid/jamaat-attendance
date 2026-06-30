@@ -375,6 +375,15 @@ export default function ScanPage() {
         )}
       </div>
 
+      <div style={{ textAlign: 'center', marginTop: '40px', paddingBottom: '20px' }}>
+        <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', color: 'gray', fontWeight: 700, marginBottom: '2px' }}>
+          Engineered By
+        </div>
+        <div style={{ fontSize: '15px', fontWeight: 900, background: 'linear-gradient(135deg, #0070f3, #7928ca)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '0.5px' }}>
+          BEHLAH
+        </div>
+      </div>
+
       {ToastComponent}
     </div>
   );
