@@ -1,23 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 import { validateSupabaseEnv } from '@/lib/supabase-config';
 
-// Singleton: reuse across requests to avoid per-request allocation
-let _serverClient = null;
-
 /** Service-role client — bypasses RLS. API routes only, never in browser. */
 export function createServerClient() {
-  if (_serverClient) return _serverClient;
-
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   validateSupabaseEnv(url, key, 'SUPABASE_SERVICE_ROLE_KEY');
 
-  _serverClient = createClient(url, key, {
+  return createClient(url, key, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
-
-  return _serverClient;
 }
 
 const AUTH_RESULT = (user, profile, error) => ({ user, profile, error });

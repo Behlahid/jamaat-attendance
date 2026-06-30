@@ -2,10 +2,12 @@ import { createServerClient } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
 
 // ── Rate limiter with automatic eviction ──
-const RATE = { max: 5, windowMs: 15 * 60 * 1000 };
+const IS_DEV = process.env.NODE_ENV !== 'production';
+const RATE = { max: IS_DEV ? 100 : 5, windowMs: IS_DEV ? 1000 : 15 * 60 * 1000 };
 const attempts = new Map();
 
 function isRateLimited(ip) {
+  if (IS_DEV) return false;
   const now = Date.now();
   const entry = attempts.get(ip);
 
@@ -41,18 +43,30 @@ export async function POST(request) {
   if (!email || !password) return fail('Email and password are required', 400);
 
   try {
-    const supabase = createServerClient();
+    // Create an ephemeral anon client for login so we don't mutate the singleton service client
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      { auth: { persistSession: false, autoRefreshToken: false } }
+    );
 
-    // Auth + profile fetch: run sequentially (profile depends on user ID)
+    // Auth + profile fetch: run sequentially
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return fail(error.message, 401);
 
-    // Fetch only needed columns instead of SELECT *
-    const { data: profile } = await supabase
+    // Now we can use the service_role client to safely bypass RLS if needed, or just use the user's client
+    const serverClient = createServerClient();
+    const { data: profile, error: profileError } = await serverClient
       .from('profiles')
       .select('id, display_name, role, created_at')
       .eq('id', data.user.id)
       .single();
+
+    if (profileError) {
+      console.error('Profile fetch error:', profileError);
+      return fail('Login succeeded but profile not found', 500);
+    }
 
     return json({ success: true, session: data.session, user: data.user, profile });
   } catch (err) {
