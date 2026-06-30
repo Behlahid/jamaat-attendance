@@ -131,24 +131,40 @@ export default function ScanPage() {
 
       ndef.addEventListener('reading', ({ message, serialNumber }) => {
         let marked = false;
-        for (const rec of message.records) {
-          try {
-            let text = new TextDecoder(rec.encoding || 'utf-8').decode(rec.data).trim();
-            text = text.replace(/^["']+|["']+$/g, '');
-            if (text) {
-              markAttendance(text, 'nfc');
-              marked = true;
-              break;
-            }
-          } catch {}
+        if (message && message.records) {
+          for (const rec of message.records) {
+            try {
+              if (rec.recordType === 'text') {
+                const view = new DataView(rec.data.buffer, rec.data.byteOffset, rec.data.byteLength);
+                const status = view.getUint8(0);
+                const langLen = status & 0x3F;
+                const textBytes = new Uint8Array(rec.data.buffer, rec.data.byteOffset + 1 + langLen, rec.data.byteLength - 1 - langLen);
+                let text = new TextDecoder('utf-8').decode(textBytes).trim();
+                text = text.replace(/^["']+|["']+$/g, '');
+                if (text) {
+                  markAttendance(text, 'nfc');
+                  marked = true;
+                  break;
+                }
+              } else {
+                let text = new TextDecoder('utf-8').decode(rec.data).trim();
+                text = text.replace(/^["']+|["']+$/g, '');
+                if (text && text.length > 2) {
+                  markAttendance(text, 'nfc');
+                  marked = true;
+                  break;
+                }
+              }
+            } catch {}
+          }
         }
         if (!marked && serialNumber) {
-          markAttendance(serialNumber.replace(/:/g, ''), 'nfc');
+          markAttendance(serialNumber.replace(/:/g, '').toUpperCase(), 'nfc');
         }
       });
 
       ndef.addEventListener('readingerror', () => {
-        showToast('❌ Could not read card', 'error');
+        showToast('❌ Unformatted or unsupported card. Cannot read.', 'error');
       });
     } catch (e) {
       setNfcScanning(false);
