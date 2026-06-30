@@ -36,18 +36,26 @@ export async function POST(request) {
 
   try {
     const supabase = createServerClient();
-    // Sanitize identifier: strip PostgREST special chars
     const cleanId = String(identifier).trim().replace(/[,()."'\\%]/g, '');
 
     if (!cleanId) {
       return NextResponse.json({ error: 'Invalid identifier' }, { status: 400 });
     }
 
+    // Convert raw hex UID to Jamaat HFID format (a-j, r-w)
+    const hexMap = {
+      '0': 'a', '1': 'b', '2': 'c', '3': 'd', '4': 'e',
+      '5': 'f', '6': 'g', '7': 'h', '8': 'i', '9': 'j',
+      'A': 'r', 'B': 's', 'C': 't', 'D': 'u', 'E': 'v', 'F': 'w',
+      'a': 'r', 'b': 's', 'c': 't', 'd': 'u', 'e': 'v', 'f': 'w'
+    };
+    const encodedHFID = cleanId.split('').map(c => hexMap[c] || c).join('');
+
     // Find member by ITS ID, barcode, or HFID
     const { data: member, error: memberError } = await supabase
       .from('members')
       .select('*')
-      .or(`its_id.eq.${cleanId},back_barcode.eq.${cleanId},hfid.eq.${cleanId}`)
+      .or(`its_id.eq.${cleanId},back_barcode.eq.${cleanId},hfid.eq.${cleanId},hfid.eq.${encodedHFID}`)
       .limit(1)
       .single();
 
