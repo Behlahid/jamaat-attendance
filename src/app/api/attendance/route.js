@@ -17,7 +17,7 @@ export async function POST(request) {
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
-  const { eventId, identifier, method = 'manual' } = body;
+  const { eventId, identifier, method = 'manual', gate = '' } = body;
 
   if (!eventId || !identifier) {
     return NextResponse.json(
@@ -110,6 +110,7 @@ export async function POST(request) {
         scanned_by: profile.id,
         method,
         status: attendanceStatus,
+        gate: String(gate).trim(),
       })
       .select()
       .single();

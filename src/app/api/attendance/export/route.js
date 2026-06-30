@@ -64,7 +64,7 @@ export async function GET(request) {
 
     // Build CSV
     const esc = (v) => '"' + String(v || '').replace(/"/g, '""') + '"';
-    let csv = 'ITS_ID,Name,HFID,BackBarcode,Status,Time,Method,Scanned_By\r\n';
+    let csv = 'ITS_ID,Name,HFID,BackBarcode,Status,Time,Method,Scanned_By,Gate\r\n';
 
     (members || []).forEach((m) => {
       const a = attendanceMap[m.id];
@@ -104,6 +104,7 @@ export async function GET(request) {
         esc(time),
         esc(method),
         esc(scannedBy),
+        esc(a ? a.gate : ''),
       ].join(',') + '\r\n';
     });
 

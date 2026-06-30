@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
+import { playSuccess, playLate, playError } from '@/lib/audio';
 
 export default function ScanPage() {
   const { user, profile, loading, signOut, apiFetch } = useAuth();
@@ -19,6 +20,18 @@ export default function ScanPage() {
   const [nfcScanning, setNfcScanning] = useState(false);
   const [nfcAbort, setNfcAbort] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [gate, setGate] = useState('');
+
+  // Load saved gate
+  useEffect(() => {
+    const savedGate = localStorage.getItem('jamaat_scanner_gate');
+    if (savedGate) setGate(savedGate);
+  }, []);
+
+  const handleGateChange = (e) => {
+    setGate(e.target.value);
+    localStorage.setItem('jamaat_scanner_gate', e.target.value);
+  };
 
   // Auth guard
   useEffect(() => {
@@ -68,6 +81,12 @@ export default function ScanPage() {
   const markAttendance = async (id, method = 'manual') => {
     if (!activeEvent) {
       showToast('❌ No active event', 'error');
+      playError();
+      return;
+    }
+    if (!gate) {
+      showToast('❌ Please select a gate first', 'error');
+      playError();
       return;
     }
     if (!id.trim()) return;
@@ -80,6 +99,7 @@ export default function ScanPage() {
           eventId: activeEvent.id,
           identifier: id.trim(),
           method,
+          gate,
         }),
       });
       const data = await res.json();
@@ -88,8 +108,10 @@ export default function ScanPage() {
         const shortName = data.member.name.split(' ').slice(0, 4).join(' ');
         if (data.record.status === 'late') {
           showToast(`⚠️ LATE: ${shortName}`, 'info');
+          playLate();
         } else {
           showToast(`✅ ${shortName}`, 'success');
+          playSuccess();
         }
         setScanCount((c) => c + 1);
         setLastScan({ name: data.member.name, its_id: data.member.its_id, time: new Date() });
@@ -98,13 +120,16 @@ export default function ScanPage() {
       } else if (res.status === 409) {
         const shortName = data.member.name.split(' ').slice(0, 3).join(' ');
         showToast(`⚠️ Already marked: ${shortName}`, 'error');
+        playError();
         if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
       } else {
         showToast(`❌ ${data.error}: ${id}`, 'error');
+        playError();
         if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
       }
     } catch (err) {
       showToast('❌ Network error', 'error');
+      playError();
     }
     setSubmitting(false);
     setIdentifier('');
@@ -113,6 +138,12 @@ export default function ScanPage() {
 
   // NFC scanning
   const startNFC = async () => {
+    if (!gate) {
+      showToast('❌ Please select a gate first', 'error');
+      playError();
+      return;
+    }
+
     if (!('NDEFReader' in window)) {
       showToast('📱 NFC needs Chrome on Android', 'error');
       return;
@@ -240,6 +271,24 @@ export default function ScanPage() {
                 </div>
               </div>
             )}
+
+            {/* Gate Selector */}
+            <div className="panel" style={{ padding: '12px 14px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '20px' }}>🚪</span>
+              <select 
+                value={gate} 
+                onChange={handleGateChange}
+                style={{ flex: 1, padding: '8px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--border)', background: 'var(--card)', color: 'var(--text)', fontSize: '14px', fontWeight: 'bold' }}
+              >
+                <option value="" disabled>Select your gate...</option>
+                <option value="Gents Main Gate">Gents Main Gate</option>
+                <option value="Gents Gate 2">Gents Gate 2</option>
+                <option value="Ladies Main Gate">Ladies Main Gate</option>
+                <option value="Ladies Gate 2">Ladies Gate 2</option>
+                <option value="VIP Gate">VIP Gate</option>
+                <option value="Office">Office / Late Entry</option>
+              </select>
+            </div>
           </>
         ) : (
           <div className="panel" style={{ textAlign: 'center', padding: 30 }}>
