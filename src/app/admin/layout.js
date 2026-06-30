@@ -65,7 +65,18 @@ export default function AdminLayout({ children }) {
       </header>
 
       {/* Page content */}
-      {children}
+      <div style={{ paddingBottom: '80px' }}>
+        {children}
+
+        <div style={{ textAlign: 'center', marginTop: '30px' }}>
+          <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', color: 'gray', fontWeight: 700, marginBottom: '2px' }}>
+            Engineered By
+          </div>
+          <div style={{ fontSize: '15px', fontWeight: 900, background: 'linear-gradient(135deg, #0070f3, #7928ca)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '0.5px' }}>
+            BEHLAH
+          </div>
+        </div>
+      </div>
 
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
