@@ -96,6 +96,12 @@ export async function POST(request) {
       .single();
 
     if (insertError) {
+      if (insertError.code === '23505') {
+        return NextResponse.json(
+          { error: 'Already marked', member: { name: member.name, its_id: member.its_id } },
+          { status: 409 }
+        );
+      }
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
