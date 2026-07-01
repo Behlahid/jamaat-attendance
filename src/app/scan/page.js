@@ -42,15 +42,32 @@ export default function ScanPage() {
     loadActiveEvent();
   }, [user, profile, loading, router, loadActiveEvent]);
 
+  const isSubmittingRef = useRef(false);
+
   const handleGateChange = (e) => {
     setGate(e.target.value);
     localStorage.setItem('jamaat_scanner_gate', e.target.value);
   };
 
-  const handleManualScan = async () => {
-    const success = await markAttendance(identifier, gate, 'manual');
+  const handleManualScan = async (overrideId) => {
+    const idToScan = typeof overrideId === 'string' ? overrideId : identifier;
+    if (!idToScan.trim() || isSubmittingRef.current) return;
+    
+    isSubmittingRef.current = true;
+    const success = await markAttendance(idToScan, gate, 'manual');
     if (success) setIdentifier('');
     inputRef.current?.focus();
+    isSubmittingRef.current = false;
+  };
+
+  const handleIdentifierChange = (e) => {
+    const val = e.target.value;
+    setIdentifier(val);
+    
+    // Auto-submit if exactly 8 digits are entered
+    if (/^\d{8}$/.test(val.trim())) {
+      handleManualScan(val.trim());
+    }
   };
 
   if (loading) {
@@ -130,14 +147,19 @@ export default function ScanPage() {
                       inputMode="numeric"
                       placeholder="Enter ITS ID…"
                       value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleManualScan()}
+                      onChange={handleIdentifierChange}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleManualScan();
+                        }
+                      }}
                       disabled={submitting}
                       autoFocus
                     />
                     <button
                       className="mark-btn"
-                      onClick={handleManualScan}
+                      onClick={() => handleManualScan()}
                       disabled={submitting || !identifier.trim()}
                     >
                       <CheckCircle2 /> Mark
