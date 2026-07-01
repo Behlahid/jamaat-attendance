@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import InstallPrompt from '@/components/InstallPrompt';
 import {
-  Landmark,
-  Wrench,
+  MoonStar,
   Mail,
   Lock,
   User,
@@ -104,7 +103,7 @@ export default function LoginPage() {
       <div className="auth-orb two" />
       <div className="auth-wrap">
         <div className="auth-badge">
-          {isSetup ? <Wrench /> : <Landmark />}
+          <MoonStar />
         </div>
         <div className="auth-heading">
           {isSetup ? 'Admin Setup' : 'Jamaat Attendance'}
@@ -215,7 +214,9 @@ export default function LoginPage() {
 
         <InstallPrompt />
 
-        <div className="auth-credit">BEHLAH</div>
+        <div className="auth-credit">
+          RAJINFOSYS PRODUCTIONS | © 2026 JAMAAT ATTENDANCE APP | v1.0
+        </div>
       </div>
     </div>
   );
