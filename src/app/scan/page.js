@@ -42,7 +42,8 @@ export default function ScanPage() {
     loadActiveEvent();
   }, [user, profile, loading, router, loadActiveEvent]);
 
-  const isSubmittingRef = useRef(false);
+  // Keep track of IDs currently in-flight to prevent double-submitting the same ID if they mash Enter
+  const pendingScansRef = useRef(new Set());
 
   const handleGateChange = (e) => {
     setGate(e.target.value);
@@ -50,21 +51,24 @@ export default function ScanPage() {
   };
 
   const handleManualScan = async (overrideId) => {
-    const idToScan = typeof overrideId === 'string' ? overrideId : identifier;
-    if (!idToScan.trim() || isSubmittingRef.current) return;
+    const idToScan = (typeof overrideId === 'string' ? overrideId : identifier).trim();
+    if (!idToScan || pendingScansRef.current.has(idToScan)) return;
     
-    isSubmittingRef.current = true;
-    const success = await markAttendance(idToScan, gate, 'manual');
-    if (success) setIdentifier('');
+    // OPTIMISTIC UI: Instantly clear the box so they can type the next person's ID immediately!
+    setIdentifier('');
     inputRef.current?.focus();
-    isSubmittingRef.current = false;
+    
+    pendingScansRef.current.add(idToScan);
+    
+    await markAttendance(idToScan, gate, 'manual');
+    
+    pendingScansRef.current.delete(idToScan);
   };
 
   const handleIdentifierChange = (e) => {
     const val = e.target.value;
     setIdentifier(val);
     
-    // Auto-submit if exactly 8 digits are entered
     if (/^\d{8}$/.test(val.trim())) {
       handleManualScan(val.trim());
     }
@@ -145,6 +149,7 @@ export default function ScanPage() {
                       className="id-input"
                       type="text"
                       inputMode="numeric"
+                      pattern="\d*"
                       placeholder="Enter ITS ID…"
                       value={identifier}
                       onChange={handleIdentifierChange}
@@ -154,13 +159,12 @@ export default function ScanPage() {
                           handleManualScan();
                         }
                       }}
-                      disabled={submitting}
                       autoFocus
                     />
                     <button
                       className="mark-btn"
                       onClick={() => handleManualScan()}
-                      disabled={submitting || !identifier.trim()}
+                      disabled={!identifier.trim()}
                     >
                       <CheckCircle2 /> Mark
                     </button>
