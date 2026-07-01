@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
-import InstallPrompt from '@/components/InstallPrompt';
+import dynamic from 'next/dynamic';
+const InstallPrompt = dynamic(() => import('@/components/InstallPrompt'), { ssr: false, loading: () => <div>Loading...</div> });
 import {
   MoonStar,
   Mail,

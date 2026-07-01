@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/AuthContext';
-import { useToast } from '@/components/Toast';
-import Modal from '@/components/Modal';
-import { Skeleton } from '@/components/Skeleton';
+import dynamic from 'next/dynamic';
+const Modal = dynamic(() => import('@/components/Modal'), { ssr: false, loading: () => <div>Loading...</div> });
+const Skeleton = dynamic(() => import('@/components/Skeleton').then(mod => mod.Skeleton), { ssr: false, loading: () => <div>Loading...</div> });
+const useToast = dynamic(() => import('@/components/Toast').then(mod => mod.useToast), { ssr: false, loading: () => ({ showToast: () => {}, ToastComponent: null }) });
 import {
   CalendarDays,
   CalendarX2,

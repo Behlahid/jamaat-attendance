@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/AuthContext';
-import { useToast } from '@/components/Toast';
-import { SkeletonRow } from '@/components/Skeleton';
+import dynamic from 'next/dynamic';
+const useToast = dynamic(() => import('@/components/Toast').then(mod => mod.useToast), { ssr: false, loading: () => ({ showToast: () => {}, ToastComponent: null }) });
+const SkeletonRow = dynamic(() => import('@/components/Skeleton').then(mod => mod.SkeletonRow), { ssr: false, loading: () => <div>Loading...</div> });
 import {
   Smartphone,
   Plus,

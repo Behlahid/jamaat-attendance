@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
-import { useToast } from '@/components/Toast';
-import { Skeleton, SkeletonStats } from '@/components/Skeleton';
 import {
   ScanLine,
   CheckCircle2,
@@ -20,7 +19,13 @@ import { Hourglass, PlayCircle } from 'lucide-react';
 
 import { useScanEvent } from '@/hooks/useScanEvent';
 import { extractTextFromNfcMessage } from '@/lib/nfcUtils';
-import { EventHeader, GateSelector, ScannerStats } from '@/components/scan/ScannerComponents';
+
+const Skeleton = dynamic(() => import('@/components/Skeleton').then(mod => mod.Skeleton), { ssr: false, loading: () => <div>Loading...</div> });
+const SkeletonStats = dynamic(() => import('@/components/Skeleton').then(mod => mod.SkeletonStats), { ssr: false, loading: () => <div>Loading...</div> });
+const EventHeader = dynamic(() => import('@/components/scan/ScannerComponents').then(mod => mod.EventHeader), { ssr: false, loading: () => <div>Loading...</div> });
+const GateSelector = dynamic(() => import('@/components/scan/ScannerComponents').then(mod => mod.GateSelector), { ssr: false, loading: () => <div>Loading...</div> });
+const ScannerStats = dynamic(() => import('@/components/scan/ScannerComponents').then(mod => mod.ScannerStats), { ssr: false, loading: () => <div>Loading...</div> });
+const useToast = dynamic(() => import('@/components/Toast').then(mod => mod.useToast), { ssr: false, loading: () => ({ showToast: () => {}, ToastComponent: null }) });
 
 export default function ScanPage() {
   const { user, profile, loading, signOut, apiFetch } = useAuth();
