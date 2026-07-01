@@ -3,6 +3,7 @@ import { playSuccess, playLate, playError } from '@/lib/audio';
 
 export function useScanEvent(apiFetch, showToast) {
   const [activeEvent, setActiveEvent] = useState(null);
+  const [availableEvents, setAvailableEvents] = useState([]);
   const [scanCount, setScanCount] = useState(0);
   const [totalMembers, setTotalMembers] = useState(0);
   const [lastScan, setLastScan] = useState(null);
@@ -23,6 +24,7 @@ export function useScanEvent(apiFetch, showToast) {
       const res = await apiFetch('/api/events?active=true');
       const data = await res.json();
       
+      setAvailableEvents(data.events || []);
       if (data.events?.length > 0) {
         const event = data.events[0];
         setActiveEvent(event);
@@ -35,6 +37,15 @@ export function useScanEvent(apiFetch, showToast) {
       setLoadingEvent(false);
     }
   }, [apiFetch]);
+
+  const switchEvent = (eventId) => {
+    const ev = availableEvents.find(e => e.id === eventId);
+    if (ev) {
+      setActiveEvent(ev);
+      setScanCount(ev.present || 0);
+      setTotalMembers(ev.total_members || 0);
+    }
+  };
 
   const markAttendance = async (id, gate, method = 'manual') => {
     if (!activeEvent || eventNotStarted || !gate || !id.trim()) {
@@ -87,6 +98,8 @@ export function useScanEvent(apiFetch, showToast) {
 
   return {
     activeEvent,
+    availableEvents,
+    switchEvent,
     scanCount,
     totalMembers,
     lastScan,

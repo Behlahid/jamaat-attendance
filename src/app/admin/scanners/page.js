@@ -11,8 +11,11 @@ import {
   Check,
   Loader2,
   Trash2,
+  Trash2,
   Info,
+  Calendar,
 } from 'lucide-react';
+import Modal from '@/components/Modal';
 
 export default function ScannersPage() {
   const { apiFetch } = useAuth();
@@ -26,6 +29,12 @@ export default function ScannersPage() {
   const [creating, setCreating] = useState(false);
   const [loadingList, setLoadingList] = useState(true);
 
+  // Event assignment state
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedScanner, setSelectedScanner] = useState(null);
+  const [allEvents, setAllEvents] = useState([]);
+  const [assignedEventIds, setAssignedEventIds] = useState([]);
+
   const loadScanners = useCallback(async () => {
     setLoadingList(true);
     try {
@@ -38,8 +47,53 @@ export default function ScannersPage() {
     setLoadingList(false);
   }, [apiFetch]);
 
+  const loadEvents = useCallback(async () => {
+    try {
+      const res = await apiFetch('/api/events');
+      const data = await res.json();
+      setAllEvents(data.events || []);
+    } catch (err) {
+      console.error('Load events error:', err);
+    }
+  }, [apiFetch]);
+
   // eslint-disable-next-line
-  useEffect(() => { loadScanners(); }, [loadScanners]);
+  useEffect(() => { loadScanners(); loadEvents(); }, [loadScanners, loadEvents]);
+
+  const openAssignModal = async (scanner) => {
+    setSelectedScanner(scanner);
+    setShowAssignModal(true);
+    try {
+      const res = await apiFetch(`/api/scanners/${scanner.id}/events`);
+      const data = await res.json();
+      setAssignedEventIds(data.eventIds || []);
+    } catch (err) {
+      showToast('Failed to load assignments', 'error');
+    }
+  };
+
+  const toggleEvent = (eventId) => {
+    setAssignedEventIds(prev => 
+      prev.includes(eventId) ? prev.filter(id => id !== eventId) : [...prev, eventId]
+    );
+  };
+
+  const saveAssignments = async () => {
+    try {
+      const res = await apiFetch(`/api/scanners/${selectedScanner.id}/events`, {
+        method: 'POST',
+        body: JSON.stringify({ eventIds: assignedEventIds })
+      });
+      if (res.ok) {
+        showToast('Assignments saved!', 'success');
+        setShowAssignModal(false);
+      } else {
+        showToast('Failed to save', 'error');
+      }
+    } catch (err) {
+      showToast('Error saving', 'error');
+    }
+  };
 
   const createScanner = async () => {
     if (!email || !password || !displayName) {
@@ -178,14 +232,22 @@ export default function ScannersPage() {
                       day: 'numeric', month: 'short', year: 'numeric',
                     })}
                   </div>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                    <button
+                      className="session-btn"
+                      onClick={() => openAssignModal(s)}
+                    >
+                      <Calendar /> Assign Events
+                    </button>
+                    <button
+                      className="session-btn danger"
+                      onClick={() => deleteScanner(s)}
+                      style={{ flexShrink: 0 }}
+                    >
+                      <Trash2 /> Delete
+                    </button>
+                  </div>
                 </div>
-                <button
-                  className="session-btn danger"
-                  onClick={() => deleteScanner(s)}
-                  style={{ flexShrink: 0 }}
-                >
-                  <Trash2 /> Delete
-                </button>
               </div>
             </div>
           ))}
@@ -203,6 +265,30 @@ export default function ScannersPage() {
           </div>
         </div>
       )}
+
+      {/* Assign Events Modal */}
+      <Modal isOpen={showAssignModal} onClose={() => setShowAssignModal(false)} title={`Assign Events to ${selectedScanner?.display_name}`}>
+        <p className="text-sm text-muted mb-3">Select which events this scanner is allowed to mark attendance for.</p>
+        <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '16px', background: 'var(--bg-secondary)', padding: '10px', borderRadius: '8px' }}>
+          {allEvents.length === 0 && <div className="text-sm text-muted">No events exist.</div>}
+          {allEvents.map(e => (
+            <label key={e.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={assignedEventIds.includes(e.id)}
+                onChange={() => toggleEvent(e.id)}
+                style={{ width: '20px', height: '20px' }}
+              />
+              <span style={{ fontSize: '15px', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Calendar size={15} /> {e.name}
+              </span>
+            </label>
+          ))}
+        </div>
+        <button className="action-btn primary" onClick={saveAssignments} style={{ width: '100%' }}>
+          <Check /> Save Assignments
+        </button>
+      </Modal>
 
       {ToastComponent}
     </div>

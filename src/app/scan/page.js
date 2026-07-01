@@ -12,7 +12,8 @@ import {
   Search,
   LogOut,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Calendar
 } from 'lucide-react';
 import { Hourglass, PlayCircle } from 'lucide-react';
 
@@ -41,7 +42,7 @@ export default function ScanPage() {
   const inputRef = useRef(null);
 
   const {
-    activeEvent, scanCount, totalMembers, lastScan,
+    activeEvent, availableEvents, switchEvent, scanCount, totalMembers, lastScan,
     loadingEvent, submitting, eventNotStarted,
     loadActiveEvent, markAttendance
   } = useScanEvent(apiFetch, showToast);
@@ -124,24 +125,64 @@ export default function ScanPage() {
       <main className="page-container" role="main">
         {loadingEvent ? (
           <>
-            <div className="skeleton-row" style={{ marginBottom: 14 }}>
-              <div className="skeleton-row-text">
-                <Skeleton width={90} height={9} />
-                <Skeleton width="60%" height={14} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
+              <div className="compact-event-header">
+                <div className="ceh-main" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Skeleton width={16} height={16} />
+                  <Skeleton width={120} height={16} />
+                </div>
+                <div className="ceh-date">
+                  <Skeleton width={60} height={14} />
+                </div>
               </div>
-              <Skeleton width={70} height={12} />
+              <div className="compact-gate-selector">
+                <Skeleton width={16} height={16} className="cgs-icon" />
+                <Skeleton width={100} height={16} style={{ marginLeft: 10, flex: 1 }} />
+                <Skeleton width={16} height={16} className="cgs-chevron" />
+              </div>
             </div>
-            <SkeletonStats />
-            <div className="panel">
-              <Skeleton width={140} height={12} style={{ marginBottom: 14 }} />
-              <Skeleton height={44} style={{ marginBottom: 10 }} />
-              <Skeleton height={48} />
+
+            <div className="panel" style={{ border: '1px solid var(--tint)', boxShadow: '0 0 20px rgba(0, 122, 255, 0.15)' }}>
+              <div className="panel-title" style={{ color: 'var(--tint)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Skeleton width={20} height={20} />
+                <Skeleton width={120} height={18} />
+              </div>
+              <div className="input-row">
+                <Skeleton height={50} style={{ flex: 1, borderRadius: 'var(--radius-sm)' }} />
+                <Skeleton width={90} height={50} style={{ borderRadius: 'var(--radius-sm)' }} />
+              </div>
+            </div>
+
+            <div className="compact-stats">
+              <div className="cs-labels">
+                <Skeleton width={80} height={14} />
+                <Skeleton width={90} height={14} />
+              </div>
+              <div className="cs-bar-wrap">
+                <Skeleton width="100%" height="100%" />
+              </div>
             </div>
           </>
         ) : (
           <>
             {activeEvent ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', marginBottom: '14px' }}>
+                {availableEvents && availableEvents.length > 1 && (
+                  <div className="compact-gate-selector" style={{ marginBottom: '-10px', zIndex: 5 }}>
+                    <Calendar size={16} className="cgs-icon" />
+                    <select 
+                      value={activeEvent.id} 
+                      onChange={(e) => switchEvent(e.target.value)} 
+                      className="cgs-select" 
+                      aria-label="Select event"
+                    >
+                      {availableEvents.map(ev => (
+                        <option key={ev.id} value={ev.id}>{ev.name}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={16} className="cgs-chevron" />
+                  </div>
+                )}
                 <EventHeader event={activeEvent} />
                 <GateSelector gate={gate} onChange={handleGateChange} />
               </div>
@@ -215,7 +256,7 @@ export default function ScanPage() {
           </>
         )}
       </main>
-      <div className="auth-credit" style={{ paddingBottom: '30px' }}>
+      <div className="auth-credit" style={{ position: 'fixed', bottom: '15px', width: '100%', textAlign: 'center', zIndex: 10 }}>
         RAJINFOSYS PRODUCTIONS | © 2026 JAMAAT ATTENDANCE APP | v1.0
       </div>
       {ToastComponent}
