@@ -97,7 +97,7 @@ function NavItem({ href, icon, label }) {
   return (
     <button
       className={`nav-item ${isActive || isExactDashboard ? 'active' : ''}`}
-      onClick={() => router.push(href)}
+      onClick={() => router.replace(href)}
     >
       <span className="nav-icon">{icon}</span>
       <span>{label}</span>

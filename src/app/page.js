@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
-import { Loader2, MoonStar } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export default function Home() {
   const { user, profile, loading } = useAuth();
@@ -26,7 +26,7 @@ export default function Home() {
       <div className="auth-orb one" />
       <div className="auth-orb two" />
       <div className="auth-loading-card">
-        <MoonStar />
+        <img src="/icon.png" alt="Logo" style={{ width: 32, height: 32 }} />
         <div className="auth-loading-title">Jamaat Attendance</div>
         <Loader2 className="spin" />
       </div>

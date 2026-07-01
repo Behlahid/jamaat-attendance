@@ -6,7 +6,6 @@ import { useAuth } from '@/lib/AuthContext';
 import dynamic from 'next/dynamic';
 const InstallPrompt = dynamic(() => import('@/components/InstallPrompt'), { ssr: false, loading: () => <div>Loading...</div> });
 import {
-  MoonStar,
   Mail,
   Lock,
   User,
@@ -95,7 +94,7 @@ export default function LoginPage() {
         <div className="auth-orb one" />
         <div className="auth-orb two" />
         <div className="auth-loading-card">
-          <MoonStar />
+          <img src="/icon.png" alt="Logo" style={{ width: 32, height: 32 }} />
           <div className="auth-loading-title">Jamaat Attendance</div>
           <Loader2 className="spin" />
         </div>
@@ -109,7 +108,7 @@ export default function LoginPage() {
       <div className="auth-orb two" />
       <div className="auth-wrap">
         <div className="auth-badge">
-          <MoonStar />
+          <img src="/icon.png" alt="Logo" style={{ width: '60%', height: '60%', objectFit: 'contain' }} />
         </div>
         <div className="auth-heading">
           {isSetup ? 'Admin Setup' : 'Jamaat Attendance'}

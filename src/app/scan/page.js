@@ -12,8 +12,7 @@ import {
   Search,
   LogOut,
   Loader2,
-  AlertCircle,
-  MoonStar
+  AlertCircle
 } from 'lucide-react';
 import { Hourglass, PlayCircle } from 'lucide-react';
 
@@ -96,7 +95,7 @@ export default function ScanPage() {
         <div className="auth-orb one" />
         <div className="auth-orb two" />
         <div className="auth-loading-card">
-          <MoonStar />
+          <img src="/icon.png" alt="Logo" style={{ width: 32, height: 32 }} />
           <div className="auth-loading-title">Loading…</div>
           <Loader2 className="spin" />
         </div>
