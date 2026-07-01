@@ -44,6 +44,30 @@ export default function Modal({ isOpen, onClose, title, children }) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Hardware Back Button interception
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Push dummy state to trap the back button
+    window.history.pushState({ modalOpen: true }, '');
+
+    const handlePopState = () => {
+      // Browser popped the dummy state. Close the modal instead of navigating back.
+      onClose();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      // If the modal was closed programmatically (e.g. 'X' button or 'Save'),
+      // the dummy state is still in history. We need to pop it manually.
+      if (window.history.state?.modalOpen) {
+        window.history.back();
+      }
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const titleId = title ? 'modal-title' : undefined;

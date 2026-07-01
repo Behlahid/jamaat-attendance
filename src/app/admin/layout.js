@@ -94,10 +94,22 @@ function NavItem({ href, icon, label }) {
   const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href));
   const isExactDashboard = href === '/admin' && pathname === '/admin';
 
+  const handleNav = () => {
+    if (pathname === href) return;
+    
+    if (pathname === '/admin') {
+      // Navigating away from Dashboard -> Push state so back button goes back to Dashboard
+      router.push(href);
+    } else {
+      // Switching tabs or returning to Dashboard -> Replace state to prevent infinite history loops
+      router.replace(href);
+    }
+  };
+
   return (
     <button
       className={`nav-item ${isActive || isExactDashboard ? 'active' : ''}`}
-      onClick={() => router.push(href)}
+      onClick={handleNav}
     >
       <span className="nav-icon">{icon}</span>
       <span>{label}</span>
