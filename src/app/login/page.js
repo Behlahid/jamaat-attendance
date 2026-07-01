@@ -91,8 +91,13 @@ export default function LoginPage() {
   if (loading || checkingSetup) {
     return (
       <div className="auth-loading">
-        <Loader2 />
-        <div className="auth-loading-title">Jamaat Attendance</div>
+        <div className="auth-orb one" />
+        <div className="auth-orb two" />
+        <div className="auth-loading-card">
+          <MoonStar />
+          <div className="auth-loading-title">Jamaat Attendance</div>
+          <Loader2 className="spin" />
+        </div>
       </div>
     );
   }

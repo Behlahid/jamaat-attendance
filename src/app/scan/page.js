@@ -5,7 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
 import { Skeleton, SkeletonStats } from '@/components/Skeleton';
-import { ScanLine, LogOut, Hourglass, CheckCircle2, Loader2, PlayCircle } from 'lucide-react';
+import {
+  ScanLine,
+  CheckCircle2,
+  XCircle,
+  WifiOff,
+  Search,
+  LogOut,
+  Loader2,
+  AlertCircle,
+  MoonStar
+} from 'lucide-react';
+import { Hourglass, PlayCircle } from 'lucide-react';
 
 import { useScanEvent } from '@/hooks/useScanEvent';
 import { extractTextFromNfcMessage } from '@/lib/nfcUtils';
@@ -77,8 +88,13 @@ export default function ScanPage() {
   if (loading) {
     return (
       <div className="auth-loading">
-        <Loader2 />
-        <div className="auth-loading-title">Loading…</div>
+        <div className="auth-orb one" />
+        <div className="auth-orb two" />
+        <div className="auth-loading-card">
+          <MoonStar />
+          <div className="auth-loading-title">Loading…</div>
+          <Loader2 className="spin" />
+        </div>
       </div>
     );
   }
