@@ -6,25 +6,25 @@
    ══════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Core Palette ── */
-  --tint: #007aff;
-  --tint-dark: #0051d5;
-  --tint-light: rgba(0, 122, 255, 0.12);
-  --tint-glow: rgba(0, 122, 255, 0.25);
+  /* ── Core Palette (Monochrome Elegance) ── */
+  --tint: #1c1c1e;
+  --tint-dark: #000000;
+  --tint-light: rgba(28, 28, 30, 0.08);
+  --tint-glow: rgba(28, 28, 30, 0.15);
 
   /* ── Semantic ── */
-  --green: #30d158;
-  --green-light: rgba(48, 209, 88, 0.12);
-  --green-mid: #28a745;
-  --green-deep: #1b7a34;
-  --red: #ff3b30;
-  --red-light: rgba(255, 59, 48, 0.12);
-  --orange: #ff9500;
-  --orange-light: rgba(255, 149, 0, 0.12);
+  --green: #28a745;
+  --green-light: rgba(40, 167, 69, 0.12);
+  --green-mid: #218838;
+  --green-deep: #19692c;
+  --red: #dc3545;
+  --red-light: rgba(220, 53, 69, 0.12);
+  --orange: #fd7e14;
+  --orange-light: rgba(253, 126, 20, 0.12);
   --blue: #007aff;
   --blue-light: rgba(0, 122, 255, 0.12);
-  --gold: #ff9f0a;
-  --gold-light: rgba(255, 159, 10, 0.12);
+  --gold: #ffc107;
+  --gold-light: rgba(255, 193, 7, 0.12);
 
   /* ── Surfaces (Liquid Glass) ── */
   --bg: #f2f2f7;

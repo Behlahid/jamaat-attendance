@@ -106,7 +106,7 @@ export function useScanEvent(apiFetch, showToast) {
     loadingEvent,
     submitting,
     eventNotStarted,
+    markAttendance,
     loadActiveEvent,
-    markAttendance
   };
 }

@@ -256,7 +256,7 @@ export default function ScanPage() {
           </>
         )}
       </main>
-      <div className="auth-credit" style={{ position: 'fixed', bottom: '15px', width: '100%', textAlign: 'center', zIndex: 10 }}>
+      <div className="auth-credit" style={{ position: 'fixed', bottom: '15px', left: 0, width: '100%', textAlign: 'center', zIndex: 10 }}>
         RAJINFOSYS PRODUCTIONS | © 2026 JAMAAT ATTENDANCE APP | v1.0
       </div>
       {ToastComponent}
