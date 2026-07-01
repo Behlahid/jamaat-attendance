@@ -55,11 +55,20 @@ export async function GET(request) {
           .select('*', { count: 'exact', head: true })
           .eq('event_id', event.id);
 
+        let restrictedMembersCount = 0;
+        if (event.is_restricted) {
+          const { count: inviteCount } = await supabase
+            .from('event_members')
+            .select('*', { count: 'exact', head: true })
+            .eq('event_id', event.id);
+          restrictedMembersCount = inviteCount || 0;
+        }
+
         return { 
           ...event, 
           attendance_count: count || 0,
           present: count || 0,
-          total_members: totalMembersCount || 0
+          total_members: event.is_restricted ? restrictedMembersCount : (totalMembersCount || 0)
         };
       })
     );
