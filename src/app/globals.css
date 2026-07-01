@@ -121,35 +121,6 @@
   --green-glow: rgba(48, 209, 88, 0.2);
 }
 
-/* ── Dark Mode ── */
-[data-theme="dark"] {
-  --bg: #000000;
-  --bg-secondary: #1c1c1e;
-  --card: rgba(44, 44, 46, 0.65);
-  --card-solid: #1c1c1e;
-  --glass: rgba(44, 44, 46, 0.45);
-  --glass-heavy: rgba(44, 44, 46, 0.65);
-  --glass-ultra: rgba(44, 44, 46, 0.82);
-  --text: #ffffff;
-  --text-secondary: #aeaeb2;
-  --muted: #636366;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-light: rgba(255, 255, 255, 0.04);
-  --specular: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 60%);
-  --specular-subtle: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 40%);
-  --inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.5);
-  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3), var(--inner-glow);
-  --green-light: rgba(48, 209, 88, 0.18);
-  --red-light: rgba(255, 59, 48, 0.18);
-  --blue-light: rgba(0, 122, 255, 0.18);
-  --gold-light: rgba(255, 159, 10, 0.15);
-  --orange-light: rgba(255, 149, 0, 0.15);
-}
-
 /* ── RTL Support ── */
 [dir="rtl"] {
   direction: rtl;

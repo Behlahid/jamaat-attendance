@@ -116,6 +116,7 @@ export async function POST(request) {
         end_time: endTime || null,
         notes: notes.trim(),
         is_active: true,
+        is_restricted: false,
         created_by: profile.id,
       })
       .select()
