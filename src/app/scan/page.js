@@ -12,9 +12,7 @@ import {
   Search,
   LogOut,
   Loader2,
-  AlertCircle,
-  Moon,
-  Sun
+  AlertCircle
 } from 'lucide-react';
 import { Hourglass, PlayCircle } from 'lucide-react';
 
@@ -41,23 +39,6 @@ export default function ScanPage() {
   });
   const [identifier, setIdentifier] = useState('');
   const inputRef = useRef(null);
-  
-  const [darkMode, setDarkMode] = useState(true);
-  
-  useEffect(() => {
-    const saved = localStorage.getItem('darkMode');
-    if (saved === 'false') {
-      setDarkMode(false);
-      document.documentElement.setAttribute('data-theme', 'light');
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const next = !darkMode;
-    setDarkMode(next);
-    localStorage.setItem('darkMode', next.toString());
-    document.documentElement.setAttribute('data-theme', next ? 'dark' : 'light');
-  };
 
   const {
     activeEvent, scanCount, totalMembers, lastScan,
@@ -122,7 +103,7 @@ export default function ScanPage() {
   }
 
   return (
-    <div className="scanner-wrap" id="main-content" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className="scanner-wrap" id="main-content">
       <div className="auth-orb one" />
       <div className="auth-orb two" />
       
@@ -133,17 +114,14 @@ export default function ScanPage() {
           <h1>Scanner</h1>
           <p>{profile?.display_name}</p>
         </div>
-        <div className="hdr-right" style={{ display: 'flex', gap: '8px' }}>
-          <button className="icon-btn" onClick={toggleTheme} aria-label="Toggle Theme" style={{ padding: '8px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text)', cursor: 'pointer' }}>
-            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
+        <div className="hdr-right">
           <button className="lock-btn" onClick={signOut} aria-label="Log out of your account">
             <LogOut /> Logout
           </button>
         </div>
       </header>
 
-      <main className="page-container" role="main" style={{ flex: 1 }}>
+      <main className="page-container" role="main">
         {loadingEvent ? (
           <>
             <div className="skeleton-row" style={{ marginBottom: 14 }}>
