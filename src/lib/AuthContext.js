@@ -42,7 +42,15 @@ export function AuthProvider({ children }) {
         const parsed = JSON.parse(savedSession);
         setSession(parsed);
         setUser(parsed.user);
-        fetchProfile(parsed.user.id, parsed.access_token).finally(() => setLoading(false));
+        
+        if (parsed.profile) {
+          setProfile(parsed.profile);
+          setLoading(false);
+          // Fetch fresh profile in the background silently
+          fetchProfile(parsed.user.id, parsed.access_token);
+        } else {
+          fetchProfile(parsed.user.id, parsed.access_token).finally(() => setLoading(false));
+        }
       } catch {
         localStorage.removeItem('jamaat_session');
         setLoading(false);
@@ -63,7 +71,7 @@ export function AuthProvider({ children }) {
     if (!res.ok) throw new Error(data.error || 'Login failed');
 
     // Save session
-    const sessionData = { ...data.session, user: data.user, session_token: data.session_token };
+    const sessionData = { ...data.session, user: data.user, session_token: data.session_token, profile: data.profile };
     localStorage.setItem('jamaat_session', JSON.stringify(sessionData));
     setSession(sessionData);
     setUser(data.user);
@@ -118,7 +126,7 @@ export function AuthProvider({ children }) {
     }
 
     // Save session
-    const sessionData = { ...loginData.session, user: loginData.user, session_token: loginData.session_token };
+    const sessionData = { ...loginData.session, user: loginData.user, session_token: loginData.session_token, profile: loginData.profile };
     localStorage.setItem('jamaat_session', JSON.stringify(sessionData));
     setSession(sessionData);
     setUser(loginData.user);

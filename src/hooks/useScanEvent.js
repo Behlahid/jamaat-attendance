@@ -26,12 +26,8 @@ export function useScanEvent(apiFetch, showToast) {
       if (data.events?.length > 0) {
         const event = data.events[0];
         setActiveEvent(event);
-        
-        const attRes = await apiFetch(`/api/attendance?eventId=${event.id}`);
-        const attData = await attRes.json();
-        
-        setScanCount(attData.present || 0);
-        setTotalMembers(attData.total || 0);
+        setScanCount(event.present || 0);
+        setTotalMembers(event.total_members || 0);
       }
     } catch (err) {
       console.error('Failed to load event:', err);

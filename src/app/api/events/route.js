@@ -42,6 +42,11 @@ export async function GET(request) {
       }
     }
 
+    // Get total members count once to attach to events
+    const { count: totalMembersCount } = await supabase
+      .from('members')
+      .select('*', { count: 'exact', head: true });
+
     // Get attendance counts for each event
     const eventsWithCounts = await Promise.all(
       authorizedEvents.map(async (event) => {
@@ -50,7 +55,12 @@ export async function GET(request) {
           .select('*', { count: 'exact', head: true })
           .eq('event_id', event.id);
 
-        return { ...event, attendance_count: count || 0 };
+        return { 
+          ...event, 
+          attendance_count: count || 0,
+          present: count || 0,
+          total_members: totalMembersCount || 0
+        };
       })
     );
 
