@@ -56,13 +56,23 @@ export async function POST(request) {
     const safeId = escapeFilter(cleanId);
     const safeHfid = escapeFilter(encodedHFID);
 
-    // Find member by ITS ID, barcode, or HFID securely
-    const { data: member, error: memberError } = await supabase
-      .from('members')
-      .select('*')
-      .or(`its_id.eq.${safeId},back_barcode.eq.${safeId},hfid.eq.${safeId},hfid.eq.${safeHfid}`)
-      .limit(1)
-      .single();
+    // Run member and event fetches in parallel to cut latency in half
+    const [memberResult, eventResult] = await Promise.all([
+      supabase
+        .from('members')
+        .select('*')
+        .or(`its_id.eq.${safeId},back_barcode.eq.${safeId},hfid.eq.${safeId},hfid.eq.${safeHfid}`)
+        .limit(1)
+        .single(),
+      supabase
+        .from('events')
+        .select('start_time, end_time, late_time, is_restricted')
+        .eq('id', eventId)
+        .single()
+    ]);
+
+    const { data: member, error: memberError } = memberResult;
+    const { data: event, error: eventError } = eventResult;
 
     if (memberError || !member) {
       return NextResponse.json(
@@ -70,13 +80,6 @@ export async function POST(request) {
         { status: 404 }
       );
     }
-
-    // Fetch event to check times and restrictions
-    const { data: event, error: eventError } = await supabase
-      .from('events')
-      .select('start_time, end_time, late_time, is_restricted')
-      .eq('id', eventId)
-      .single();
 
     if (eventError || !event) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
@@ -106,20 +109,7 @@ export async function POST(request) {
       }
     }
 
-    // Check if already marked
-    const { data: existing } = await supabase
-      .from('attendance')
-      .select('id')
-      .eq('event_id', eventId)
-      .eq('member_id', member.id)
-      .single();
 
-    if (existing) {
-      return NextResponse.json(
-        { error: 'Already marked', member: { name: member.name, its_id: member.its_id } },
-        { status: 409 }
-      );
-    }
 
     // Mark attendance
     const { data: record, error: insertError } = await supabase
