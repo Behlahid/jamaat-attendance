@@ -91,7 +91,7 @@ export default function LoginPage() {
 
   if (loading || checkingSetup) {
     return (
-      <div className="auth-loading">
+      <div className="auth-loading" role="status" aria-label="Loading">
         <div className="auth-orb one" />
         <div className="auth-orb two" />
         <div className="auth-loading-card">
@@ -185,7 +185,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="auth-error">
+            <div className="auth-error" role="alert" aria-live="polite">
               <AlertCircle />
               <span>{error}</span>
             </div>
