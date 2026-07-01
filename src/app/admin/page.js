@@ -14,11 +14,20 @@ import {
   History,
 } from 'lucide-react';
 
+const logError = (context, err) => {
+  console.error(`[AdminDashboard] ${context}:`, {
+    name: err?.name,
+    message: err?.message,
+    stack: err?.stack,
+  });
+};
+
 export default function AdminDashboard() {
   const { apiFetch } = useAuth();
   const [activeEvent, setActiveEvent] = useState(null);
   const [stats, setStats] = useState({ present: 0, total: 0, absent: 0 });
   const [recentScans, setRecentScans] = useState([]);
+  const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
 
@@ -43,7 +52,8 @@ export default function AdminDashboard() {
         setRecentScans((attData.attendance || []).slice(0, 15));
       }
     } catch (err) {
-      console.error('Dashboard load error:', err);
+      logError('loadData', err);
+      setError('Failed to load dashboard data. Please try again later.');
     }
     setLoadingData(false);
   }, [apiFetch]);
@@ -67,13 +77,17 @@ export default function AdminDashboard() {
           filter: `event_id=eq.${activeEvent.id}`,
         },
         (payload) => {
-          const newRecord = payload.new;
-          setRecentScans((prev) => [newRecord, ...prev].slice(0, 15));
-          setStats((prev) => ({
-            ...prev,
-            present: prev.present + 1,
-            absent: prev.absent - 1,
-          }));
+          try {
+            const newRecord = payload.new;
+            setRecentScans((prev) => [newRecord, ...prev].slice(0, 15));
+            setStats((prev) => ({
+              ...prev,
+              present: prev.present + 1,
+              absent: prev.absent - 1,
+            }));
+          } catch (err) {
+            logError('realtime subscription', err);
+          }
         }
       )
       .subscribe();
@@ -98,7 +112,8 @@ export default function AdminDashboard() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Export error:', err);
+        logError('exportCSV', err);
+        setError('Failed to export CSV. Please try again.');
     }
   };
 
