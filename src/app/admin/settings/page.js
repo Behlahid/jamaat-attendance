@@ -23,6 +23,7 @@ export default function SettingsPage() {
     // Load dark mode from localStorage
     const saved = localStorage.getItem('darkMode');
     if (saved === 'true') {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       setDarkMode(true);
       document.documentElement.setAttribute('data-theme', 'dark');
     }

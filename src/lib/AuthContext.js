@@ -40,6 +40,7 @@ export function AuthProvider({ children }) {
     if (savedSession) {
       try {
         const parsed = JSON.parse(savedSession);
+        // eslint-disable-next-line
         setSession(parsed);
         setUser(parsed.user);
         

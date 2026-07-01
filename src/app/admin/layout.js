@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import {
   Crown,
@@ -87,10 +87,8 @@ export default function AdminLayout({ children }) {
 
 function NavItem({ href, icon, label }) {
   const router = useRouter();
-  let pathname = '';
-  if (typeof window !== 'undefined') {
-    pathname = window.location.pathname;
-  }
+  const pathname = usePathname() || '';
+  
   const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href));
   const isExactDashboard = href === '/admin' && pathname === '/admin';
 

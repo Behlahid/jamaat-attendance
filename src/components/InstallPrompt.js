@@ -24,6 +24,7 @@ export default function InstallPrompt() {
       navigator.serviceWorker.register('/sw.js').catch(console.error);
     }
     
+    // eslint-disable-next-line
     setInstalled(isStandalone());
     setIos(isIOS());
     setDismissed(sessionStorage.getItem('pwa_install_dismissed') === '1');

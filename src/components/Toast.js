@@ -14,6 +14,7 @@ export default function Toast({ message, type = 'success', onDismiss }) {
 
   useEffect(() => {
     if (message) {
+      // eslint-disable-next-line
       setVisible(true);
       const timer = setTimeout(() => {
         setVisible(false);

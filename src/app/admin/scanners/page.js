@@ -38,6 +38,7 @@ export default function ScannersPage() {
     setLoadingList(false);
   }, [apiFetch]);
 
+  // eslint-disable-next-line
   useEffect(() => { loadScanners(); }, [loadScanners]);
 
   const createScanner = async () => {

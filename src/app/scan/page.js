@@ -24,14 +24,19 @@ const SkeletonStats = dynamic(() => import('@/components/Skeleton').then(mod => 
 const EventHeader = dynamic(() => import('@/components/scan/ScannerComponents').then(mod => mod.EventHeader), { ssr: false, loading: () => <div>Loading...</div> });
 const GateSelector = dynamic(() => import('@/components/scan/ScannerComponents').then(mod => mod.GateSelector), { ssr: false, loading: () => <div>Loading...</div> });
 const ScannerStats = dynamic(() => import('@/components/scan/ScannerComponents').then(mod => mod.ScannerStats), { ssr: false, loading: () => <div>Loading...</div> });
-const useToast = dynamic(() => import('@/components/Toast').then(mod => mod.useToast), { ssr: false, loading: () => ({ showToast: () => {}, ToastComponent: null }) });
+import { useToast } from '@/components/Toast';
 
 export default function ScanPage() {
   const { user, profile, loading, signOut, apiFetch } = useAuth();
   const router = useRouter();
   const { showToast, ToastComponent } = useToast();
   
-  const [gate, setGate] = useState('');
+  const [gate, setGate] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('jamaat_scanner_gate') || '';
+    }
+    return '';
+  });
   const [identifier, setIdentifier] = useState('');
   const inputRef = useRef(null);
 
@@ -40,12 +45,6 @@ export default function ScanPage() {
     loadingEvent, submitting, eventNotStarted,
     loadActiveEvent, markAttendance
   } = useScanEvent(apiFetch, showToast);
-
-  // Initialize gate from local storage
-  useEffect(() => {
-    const savedGate = localStorage.getItem('jamaat_scanner_gate');
-    if (savedGate) setGate(savedGate);
-  }, []);
 
   // Auth Guard
   useEffect(() => {
