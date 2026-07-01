@@ -19,13 +19,16 @@ export async function GET(request) {
     let query = supabase.from('members').select('*', { count: 'exact' });
 
     if (search.trim()) {
-      // Sanitize: strip PostgREST filter operators to prevent injection
-      const s = search.replace(/[%_\\,()."']/g, '').trim();
-      if (s) {
-        query = query.or(
-          `name.ilike.%${s}%,its_id.ilike.%${s}%,hfid.ilike.%${s}%,back_barcode.ilike.%${s}%`
-        );
-      }
+      // 1. Escape SQL LIKE special characters (% and _)
+      const escapeLike = (val) => val.replace(/[%_\\]/g, '\\$&');
+      // 2. Wrap in double quotes and escape internal quotes for Supabase string filters
+      const escapeFilter = (val) => `"%${escapeLike(val).replace(/"/g, '""')}%"`;
+      
+      const safeSearch = escapeFilter(search.trim());
+      
+      query = query.or(
+        `name.ilike.${safeSearch},its_id.ilike.${safeSearch},hfid.ilike.${safeSearch},back_barcode.ilike.${safeSearch}`
+      );
     }
 
     const { data, error: fetchError, count } = await query

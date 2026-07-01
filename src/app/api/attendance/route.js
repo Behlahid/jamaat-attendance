@@ -36,7 +36,7 @@ export async function POST(request) {
 
   try {
     const supabase = createServerClient();
-    const cleanId = String(identifier).trim().replace(/[,()."'\\%]/g, '');
+    const cleanId = String(identifier).trim();
 
     if (!cleanId) {
       return NextResponse.json({ error: 'Invalid identifier' }, { status: 400 });
@@ -51,11 +51,16 @@ export async function POST(request) {
     };
     const encodedHFID = cleanId.split('').map(c => hexMap[c] || c).join('');
 
-    // Find member by ITS ID, barcode, or HFID
+    // Securely escape variables for the Supabase .or() filter string
+    const escapeFilter = (val) => `"${String(val).replace(/"/g, '""')}"`;
+    const safeId = escapeFilter(cleanId);
+    const safeHfid = escapeFilter(encodedHFID);
+
+    // Find member by ITS ID, barcode, or HFID securely
     const { data: member, error: memberError } = await supabase
       .from('members')
       .select('*')
-      .or(`its_id.eq.${cleanId},back_barcode.eq.${cleanId},hfid.eq.${cleanId},hfid.eq.${encodedHFID}`)
+      .or(`its_id.eq.${safeId},back_barcode.eq.${safeId},hfid.eq.${safeId},hfid.eq.${safeHfid}`)
       .limit(1)
       .single();
 
