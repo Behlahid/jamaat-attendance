@@ -142,10 +142,10 @@ export default function ScanPage() {
         ) : (
           <>
             {activeEvent ? (
-              <>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
                 <EventHeader event={activeEvent} />
                 <GateSelector gate={gate} onChange={handleGateChange} />
-              </>
+              </div>
             ) : (
               <div className="panel empty-state">
                 <div className="empty-icon"><Hourglass /></div>
@@ -154,12 +154,10 @@ export default function ScanPage() {
               </div>
             )}
 
-            <ScannerStats present={scanCount} total={totalMembers} />
-
-            {/* Scan Input Block */}
+            {/* Scan Input Block (Primary Focus) */}
             {activeEvent && (
-              <div className="panel">
-                <div className="panel-title"><ScanLine /> Scan Attendance</div>
+              <div className="panel" style={{ border: '1px solid var(--tint)', boxShadow: '0 0 20px rgba(0, 122, 255, 0.15)' }}>
+                <div className="panel-title" style={{ color: 'var(--tint)' }}><ScanLine /> Scan Attendance</div>
                 {eventNotStarted ? (
                   <div className="empty-state" style={{ padding: '20px 10px' }}>
                     <div className="empty-icon"><PlayCircle /></div>
@@ -199,18 +197,23 @@ export default function ScanPage() {
                 )}
               </div>
             )}
-          </>
-        )}
 
-        {/* Last Scan Banner */}
-        {lastScan && (
-          <div className="panel" style={{ background: 'rgba(200, 164, 74, 0.25)', border: '1px solid rgba(200, 164, 74, 0.5)' }}>
-            <div className="last-scan-label" style={{ color: '#e5c158' }}><CheckCircle2 /> LAST SCAN</div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: 'white' }}>{lastScan.name}</div>
-            <div className="text-muted text-xs" style={{ marginTop: 2, color: 'rgba(255,255,255,0.7)' }}>
-              ITS: {lastScan.its_id} · {lastScan.time.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-            </div>
-          </div>
+            {/* Immediate Feedback (Last Scan Banner) */}
+            {lastScan && (
+              <div key={lastScan.time.getTime()} className="panel flash-success" style={{ border: '1px solid rgba(48, 209, 88, 0.4)' }}>
+                <div className="last-scan-label" style={{ color: 'var(--green)' }}><CheckCircle2 /> SUCCESS</div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: 'white' }}>{lastScan.name}</div>
+                <div className="text-muted text-sm" style={{ marginTop: 2, color: 'rgba(255,255,255,0.7)' }}>
+                  ITS: {lastScan.its_id} · {lastScan.time.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </div>
+              </div>
+            )}
+
+            {/* Compact Stats at the bottom */}
+            {activeEvent && (
+              <ScannerStats present={scanCount} total={totalMembers} />
+            )}
+          </>
         )}
       </main>
       <div className="auth-credit" style={{ paddingBottom: '30px' }}>

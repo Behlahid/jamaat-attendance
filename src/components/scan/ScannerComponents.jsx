@@ -2,85 +2,49 @@ import { MapPin, PlayCircle, AlertTriangle, StopCircle, DoorOpen, ChevronDown, U
 
 export function EventHeader({ event }) {
   if (!event) return null;
-  const { name, event_date, start_time, late_time, end_time } = event;
+  const { name, event_date } = event;
   
-  const formatTime = (isoString) => isoString ? new Date(isoString).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Not set';
-
   return (
-    <>
-      <div className="event-bar">
-        <div>
-          <div className="event-label">Active Event</div>
-          <div className="event-name"><MapPin /> {name}</div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div className="event-label">
-            {new Date(event_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-          </div>
-        </div>
+    <div className="compact-event-header">
+      <div className="ceh-main">
+        <MapPin size={16} />
+        <span className="ceh-name">{name}</span>
       </div>
-
-      {(start_time || end_time || late_time) && (
-        <div className="time-panel">
-          <div className="time-row start">
-            <span className="time-row-icon"><PlayCircle /></span>
-            <span className="time-row-label">Starts</span>
-            <span className="time-row-value">{formatTime(start_time)}</span>
-          </div>
-          <div className="time-row late">
-            <span className="time-row-icon"><AlertTriangle /></span>
-            <span className="time-row-label">Late After</span>
-            <span className="time-row-value">{formatTime(late_time)}</span>
-          </div>
-          <div className="time-row end">
-            <span className="time-row-icon"><StopCircle /></span>
-            <span className="time-row-label">Ends</span>
-            <span className="time-row-value">{formatTime(end_time)}</span>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
-export function GateSelector({ gate, onChange }) {
-  return (
-    <div className="panel" style={{ padding: '12px 14px', marginBottom: '14px' }}>
-      <label htmlFor="gate-select" className="sr-only">Select your gate</label>
-      <div className="field-icon-wrap">
-        <span className="field-icon" aria-hidden="true"><DoorOpen /></span>
-        <select id="gate-select" value={gate} onChange={onChange} className="gate-select" aria-label="Select your gate">
-          <option value="" disabled>Select your gate...</option>
-          <option value="Gents Main Gate">Gents Main Gate</option>
-          <option value="Gents Gate 2">Gents Gate 2</option>
-          <option value="Ladies Main Gate">Ladies Main Gate</option>
-          <option value="Ladies Gate 2">Ladies Gate 2</option>
-          <option value="VIP Gate">VIP Gate</option>
-          <option value="Office">Office / Late Entry</option>
-        </select>
-        <span className="gate-chevron" aria-hidden="true"><ChevronDown /></span>
+      <div className="ceh-date">
+        {new Date(event_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
       </div>
     </div>
   );
 }
 
-export function ScannerStats({ present, total }) {
+export function GateSelector({ gate, onChange }) {
   return (
-    <div className="stats-row">
-      <div className="stat-card present">
-        <span className="stat-icon"><UserCheck /></span>
-        <div className="stat-num">{present}</div>
-        <div className="stat-label">Scanned</div>
+    <div className="compact-gate-selector">
+      <DoorOpen size={16} className="cgs-icon" />
+      <select value={gate} onChange={onChange} className="cgs-select" aria-label="Select your gate">
+        <option value="" disabled>Select gate...</option>
+        <option value="Gents Main Gate">Gents Main Gate</option>
+        <option value="Gents Gate 2">Gents Gate 2</option>
+        <option value="Ladies Main Gate">Ladies Main Gate</option>
+        <option value="Ladies Gate 2">Ladies Gate 2</option>
+        <option value="VIP Gate">VIP Gate</option>
+        <option value="Office">Office / Late Entry</option>
+      </select>
+      <ChevronDown size={16} className="cgs-chevron" />
+    </div>
+  );
+}
+
+export function ScannerStats({ present, total }) {
+  const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+  return (
+    <div className="compact-stats">
+      <div className="cs-labels">
+        <span className="cs-label"><UserCheck size={14}/> Scanned: {present}</span>
+        <span className="cs-label"><UserX size={14}/> Remaining: {total - present}</span>
       </div>
-      <div className="stat-card">
-        <span className="stat-icon"><Users /></span>
-        <div className="stat-num">{total}</div>
-        <div className="stat-label">Total</div>
-      </div>
-      <div className="stat-card absent">
-        <span className="stat-icon"><UserX /></span>
-        <div className="stat-num">{total - present}</div>
-        <div className="stat-label">Remaining</div>
+      <div className="cs-bar-wrap">
+        <div className="cs-bar-fill" style={{ width: `${percentage}%` }}></div>
       </div>
     </div>
   );
