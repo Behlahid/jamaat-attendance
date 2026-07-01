@@ -13,7 +13,8 @@ import {
   LogOut,
   Loader2,
   AlertCircle,
-  Calendar
+  Calendar,
+  ChevronDown
 } from 'lucide-react';
 import { Hourglass, PlayCircle } from 'lucide-react';
 

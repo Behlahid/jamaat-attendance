@@ -11,7 +11,6 @@ import {
   Check,
   Loader2,
   Trash2,
-  Trash2,
   Info,
   Calendar,
 } from 'lucide-react';
