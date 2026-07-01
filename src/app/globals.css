@@ -270,6 +270,7 @@ body {
   justify-content: center;
   padding: 24px 16px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .auth-page::before {
@@ -283,7 +284,7 @@ body {
 }
 
 .auth-orb {
-  position: absolute;
+  position: fixed;
   border-radius: 50%;
   filter: blur(60px);
   pointer-events: none;
