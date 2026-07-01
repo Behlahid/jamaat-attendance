@@ -5,6 +5,7 @@ export function Skeleton({ width = '100%', height = 12, circle = false, style, c
     <span
       className={`skeleton ${circle ? 'circle' : ''} ${className}`}
       style={{ width, height, flexShrink: 0, ...style }}
+      aria-hidden="true"
     />
   );
 }
@@ -38,7 +39,7 @@ export function SkeletonRow({ trailing = true }) {
 
 export function SkeletonList({ rows = 4, trailing = true }) {
   return (
-    <div className="member-list">
+    <div className="member-list" role="status" aria-label="Loading content">
       {Array.from({ length: rows }).map((_, i) => (
         <SkeletonRow key={i} trailing={trailing} />
       ))}

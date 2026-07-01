@@ -46,9 +46,10 @@ export function EventHeader({ event }) {
 export function GateSelector({ gate, onChange }) {
   return (
     <div className="panel" style={{ padding: '12px 14px', marginBottom: '14px' }}>
+      <label htmlFor="gate-select" className="sr-only">Select your gate</label>
       <div className="field-icon-wrap">
-        <span className="field-icon"><DoorOpen /></span>
-        <select value={gate} onChange={onChange} className="gate-select">
+        <span className="field-icon" aria-hidden="true"><DoorOpen /></span>
+        <select id="gate-select" value={gate} onChange={onChange} className="gate-select" aria-label="Select your gate">
           <option value="" disabled>Select your gate...</option>
           <option value="Gents Main Gate">Gents Main Gate</option>
           <option value="Gents Gate 2">Gents Gate 2</option>
@@ -57,7 +58,7 @@ export function GateSelector({ gate, onChange }) {
           <option value="VIP Gate">VIP Gate</option>
           <option value="Office">Office / Late Entry</option>
         </select>
-        <span className="gate-chevron"><ChevronDown /></span>
+        <span className="gate-chevron" aria-hidden="true"><ChevronDown /></span>
       </div>
     </div>
   );

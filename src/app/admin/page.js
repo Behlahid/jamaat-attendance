@@ -143,7 +143,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="page-container">
+    <main className="page-container" id="main-content" role="main">
       {/* Active Event Card */}
       {activeEvent ? (
         <div className="event-bar">
@@ -199,7 +199,13 @@ export default function AdminDashboard() {
             background: 'var(--bg)',
             borderRadius: 5,
             overflow: 'hidden',
-          }}>
+          }}
+            role="progressbar"
+            aria-valuenow={percentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Attendance progress: ${percentage}%`}
+          >
             <div style={{
               height: '100%',
               width: `${percentage}%`,
@@ -224,7 +230,7 @@ export default function AdminDashboard() {
               </div>
             </div>
           ) : (
-            <div className="member-list">
+            <div className="member-list" role="log" aria-live="polite" aria-label="Live scan feed">
               {recentScans.map((scan, i) => (
                 <div key={scan.id || i} className="member-card present" style={{
                   animation: i === 0 ? 'justMarked 0.6s ease' : 'none',
@@ -285,6 +291,6 @@ export default function AdminDashboard() {
           ))}
         </div>
       )}
-    </div>
+    </main>
   );
 }

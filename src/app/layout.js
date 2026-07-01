@@ -9,8 +9,6 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({ children }) {
@@ -23,6 +21,7 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-title" content="Attendance" />
       </head>
       <body>
+        <a href="#main-content" className="skip-link">Skip to main content</a>
         <AuthProvider>
           {children}
         </AuthProvider>

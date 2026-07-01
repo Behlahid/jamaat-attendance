@@ -92,7 +92,7 @@ export default function ScanPage() {
 
   if (loading) {
     return (
-      <div className="auth-loading">
+      <div className="auth-loading" role="status" aria-label="Loading">
         <div className="auth-orb one" />
         <div className="auth-orb two" />
         <div className="auth-loading-card">
@@ -105,7 +105,7 @@ export default function ScanPage() {
   }
 
   return (
-    <div className="scanner-wrap">
+    <div className="scanner-wrap" id="main-content">
       <div className="auth-orb one" />
       <div className="auth-orb two" />
       
@@ -117,13 +117,13 @@ export default function ScanPage() {
           <p>{profile?.display_name}</p>
         </div>
         <div className="hdr-right">
-          <button className="lock-btn" onClick={signOut}>
+          <button className="lock-btn" onClick={signOut} aria-label="Log out of your account">
             <LogOut /> Logout
           </button>
         </div>
       </header>
 
-      <div className="page-container">
+      <main className="page-container" role="main">
         {loadingEvent ? (
           <>
             <div className="skeleton-row" style={{ marginBottom: 14 }}>
@@ -168,13 +168,16 @@ export default function ScanPage() {
                   </div>
                 ) : (
                   <div className="input-row">
+                    <label htmlFor="its-id-input" className="sr-only">Enter ITS ID</label>
                     <input
+                      id="its-id-input"
                       ref={inputRef}
                       className="id-input"
                       type="text"
                       inputMode="numeric"
                       pattern="\d*"
                       placeholder="Enter ITS ID…"
+                      aria-label="Enter ITS ID for attendance"
                       value={identifier}
                       onChange={handleIdentifierChange}
                       onKeyDown={(e) => {
@@ -189,6 +192,7 @@ export default function ScanPage() {
                       className="mark-btn"
                       onClick={() => handleManualScan()}
                       disabled={!identifier.trim()}
+                      aria-label="Mark attendance"
                     >
                       <CheckCircle2 /> Mark
                     </button>
@@ -209,7 +213,7 @@ export default function ScanPage() {
             </div>
           </div>
         )}
-      </div>
+      </main>
       <div className="auth-credit" style={{ paddingBottom: '30px' }}>
         RAJINFOSYS PRODUCTIONS | © 2026 JAMAAT ATTENDANCE APP | v1.0
       </div>

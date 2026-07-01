@@ -62,7 +62,7 @@ export default function InstallPrompt() {
   if (!deferredPrompt && !ios) return null;
 
   return (
-    <div className="install-banner">
+    <div className="install-banner" role="complementary" aria-label="Install application">
       <div className="install-banner-icon"><Download /></div>
       <div className="install-banner-text">
         <div className="install-banner-title">Install the app</div>

@@ -28,7 +28,12 @@ export default function Toast({ message, type = 'success', onDismiss }) {
   const Icon = TOAST_ICONS[type] || Info;
 
   return (
-    <div className={`toast ${visible ? 'show' : ''} ${type}`}>
+    <div
+      className={`toast ${visible ? 'show' : ''} ${type}`}
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       <Icon className="toast-icon" />
       <span>{message}</span>
     </div>

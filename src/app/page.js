@@ -22,7 +22,7 @@ export default function Home() {
   }, [user, profile, loading, router]);
 
   return (
-    <div className="auth-loading">
+    <div className="auth-loading" role="status" aria-label="Loading">
       <div className="auth-orb one" />
       <div className="auth-orb two" />
       <div className="auth-loading-card">
