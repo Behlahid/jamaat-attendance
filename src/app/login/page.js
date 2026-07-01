@@ -108,7 +108,7 @@ export default function LoginPage() {
       <div className="auth-orb two" />
       <div className="auth-wrap">
         <div className="auth-badge">
-          <img src="/icon.png" alt="Logo" style={{ width: '60%', height: '60%', objectFit: 'contain' }} />
+          <img src="/icon.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         <div className="auth-heading">
           {isSetup ? 'Admin Setup' : 'Jamaat Attendance'}

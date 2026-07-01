@@ -452,19 +452,15 @@ body {
 }
 
 .auth-badge {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--radius-2xl);
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(20px) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(20px) saturate(var(--glass-saturate));
-  border: 1px solid rgba(255,255,255,0.15);
+  width: 76px;
+  height: 76px;
+  border-radius: 18px; /* iOS standard proportion */
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: var(--space-xl);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.3), var(--inner-glow);
-  color: var(--tint);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4);
 }
 
 .auth-badge svg {
