@@ -20,6 +20,10 @@ export default function InstallPrompt() {
   const [ios, setIos] = useState(false);
 
   useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
+    }
+    
     setInstalled(isStandalone());
     setIos(isIOS());
     setDismissed(sessionStorage.getItem('pwa_install_dismissed') === '1');
