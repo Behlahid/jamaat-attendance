@@ -100,7 +100,10 @@ export default function ScanPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+    <div className="scanner-wrap">
+      <div className="auth-orb one" />
+      <div className="auth-orb two" />
+      
       {/* Header */}
       <header className="app-header">
         <div className="hdr-icon"><ScanLine /></div>
@@ -193,16 +196,18 @@ export default function ScanPage() {
 
         {/* Last Scan Banner */}
         {lastScan && (
-          <div className="panel" style={{ background: 'var(--green-light)', border: '1px solid rgba(46,139,87,0.2)' }}>
-            <div className="last-scan-label"><CheckCircle2 /> LAST SCAN</div>
-            <div style={{ fontSize: 14, fontWeight: 800 }}>{lastScan.name}</div>
-            <div className="text-muted text-xs" style={{ marginTop: 2 }}>
+          <div className="panel" style={{ background: 'rgba(200, 164, 74, 0.25)', border: '1px solid rgba(200, 164, 74, 0.5)' }}>
+            <div className="last-scan-label" style={{ color: '#e5c158' }}><CheckCircle2 /> LAST SCAN</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: 'white' }}>{lastScan.name}</div>
+            <div className="text-muted text-xs" style={{ marginTop: 2, color: 'rgba(255,255,255,0.7)' }}>
               ITS: {lastScan.its_id} · {lastScan.time.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </div>
           </div>
         )}
       </div>
-      <div className="page-credit">BEHLAH</div>
+      <div className="auth-credit" style={{ paddingBottom: '30px' }}>
+        RAJINFOSYS PRODUCTIONS | © 2026 JAMAAT ATTENDANCE APP | v1.0
+      </div>
       {ToastComponent}
     </div>
   );
